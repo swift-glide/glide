@@ -10,30 +10,12 @@ final class HTTPHandler: ChannelInboundHandler {
 
     switch requestPart {
     case .head(let header):
-      print("req:", header)
+      let request = ClientRequest(header: header)
+      let response = ServerResponse(channel: context.channel)
 
-      let channel = context.channel
+      print("req:", header.method, header.uri, request)
 
-      let head = HTTPResponseHead(
-        version: header.version,
-        status: .ok
-      )
-
-      let part = HTTPServerResponsePart.head(head)
-      channel.write(part).whenSuccess({})
-
-      var buffer = channel.allocator.buffer(capacity: 42)
-      buffer.writeString("Hello Schwifty World!")
-
-      let bodypart = HTTPServerResponsePart.body(.byteBuffer(buffer))
-      channel.write(bodypart).whenSuccess({})
-
-      let endpart = HTTPServerResponsePart.end(nil)
-
-     channel.writeAndFlush(endpart).whenSuccess {
-        channel.close().whenSuccess({})
-      }
-
+      response.send("Way easier to send data!!!")
     case .body, .end: break
     }
   }
