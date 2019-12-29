@@ -10,8 +10,8 @@ public final class Request {
 }
 
 public extension Request {
-  func param(_ id: String) -> String? {
-    let parameters = userInfo[paramDictKey] as? [String: String]
+  func parameter(_ id: String) -> String? {
+    let parameters = userInfo[requestParameterKey] as? [String: String]
     return parameters?[id]
   }
 }

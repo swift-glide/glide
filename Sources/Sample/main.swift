@@ -13,7 +13,7 @@ app.use(
 )
 
 app.get { request, response, _ in
-  let text = request.param("text") ?? "Schwifty"
+  let text = request.parameter("text") ?? "Schwifty"
   response.send("Hello, \(text) world!")
 }
 
