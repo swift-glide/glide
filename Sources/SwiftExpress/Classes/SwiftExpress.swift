@@ -5,6 +5,7 @@ import HTMLKit
 
 public final class SwiftExpress: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+  public var htmlKit: HTMLKit?
 
   public override init() {}
 
@@ -63,29 +64,5 @@ public final class SwiftExpress: Router {
 
     return bootstrap
 
-  }
-}
-
-extension SwiftExpress {
-  public var htmlKit: HTMLKit {
-    .shared
-  }
-
-  public class HTMLKit {
-    static let shared = HTMLKit()
-
-    var renderer = HTMLRenderer()
-
-    public func add<T: HTMLTemplate>(view: T) throws {
-      try renderer.add(view: view)
-    }
-
-    public func add<T: HTMLPage>(view: T) throws {
-      try renderer.add(view: view)
-    }
-
-    public func registerLocalization(atPath path: String, defaultLocale: String) throws {
-      try renderer.registerLocalization(atPath: path, defaultLocale: defaultLocale)
-    }
   }
 }

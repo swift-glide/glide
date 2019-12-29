@@ -5,9 +5,9 @@ import NIOHTTP1
 final class RequestHandler: ChannelInboundHandler {
   typealias InboundIn = HTTPServerRequestPart
 
-  let router : SwiftExpress
+  let router: Router
 
-  init(router: SwiftExpress) {
+  init(router: Router) {
     self.router = router
   }
 
@@ -17,8 +17,7 @@ final class RequestHandler: ChannelInboundHandler {
     switch requestPart {
     case .head(let header):
       let request = Request(header: header)
-      let response = Response(channel: context.channel,
-                              renderer: router.htmlKit.renderer)
+      let response = Response(channel: context.channel)
 
       router.handle(request: request,
                     response: response) { (items : Any...) in

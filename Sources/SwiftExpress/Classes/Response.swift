@@ -8,13 +8,13 @@ public class Response {
   public var status = HTTPResponseStatus.ok
   public var headers = HTTPHeaders()
   public let channel: Channel
+  public var htmlRenderer: HTMLRenderer?
+
   private var didWriteHeader = false
   private var didEnd = false
-  private var htmlRenderer: HTMLRenderer?
 
-  public init(channel: Channel, renderer: HTMLRenderer? = nil) {
+  public init(channel: Channel) {
     self.channel = channel
-    self.htmlRenderer = renderer
   }
 
   public func send(_ text: String) {
