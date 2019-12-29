@@ -22,7 +22,7 @@ final class RequestHandler: ChannelInboundHandler {
       router.handle(request: request,
                     response: response) { (items : Any...) in
                       response.status = .notFound
-                      response.send("No middleware handled the request!")
+                      response.send("Page not found.")
       }
     case .body, .end: break
     }
