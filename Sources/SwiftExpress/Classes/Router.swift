@@ -5,8 +5,8 @@ public class Router {
     self.middleware.append(contentsOf: middleware)
   }
 
-  func handle(request: ClientRequest,
-              response: ServerResponse,
+  func handle(request: Request,
+              response: Response,
               next upperNext: @escaping Next) {
 
     let stack = self.middleware
@@ -22,5 +22,16 @@ public class Router {
     }
 
     next!()
+  }
+
+  func get(_ path: String = "",
+           middleware: @escaping Middleware) {
+    use { request, response, next in
+      guard request.header.method == .GET,
+        request.header.uri.hasPrefix(path)
+        else { return next() }
+
+      middleware(request, response, next)
+    }
   }
 }

@@ -2,7 +2,7 @@ import Foundation
 import NIO
 import NIOHTTP1
 
-final class HTTPHandler: ChannelInboundHandler {
+final class RequestHandler: ChannelInboundHandler {
   typealias InboundIn = HTTPServerRequestPart
 
   let router : Router
@@ -16,8 +16,8 @@ final class HTTPHandler: ChannelInboundHandler {
 
     switch requestPart {
     case .head(let header):
-      let request = ClientRequest(header: header)
-      let response = ServerResponse(channel: context.channel)
+      let request = Request(header: header)
+      let response = Response(channel: context.channel)
 
       router.handle(request: request,
                     response: response) { (items : Any...) in

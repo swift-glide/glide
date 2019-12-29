@@ -1,7 +1,7 @@
 public typealias Next = (Any...) -> Void
 
 public typealias Middleware = (
-  ClientRequest,
-  ServerResponse,
+  Request,
+  Response,
   @escaping Next
 ) -> Void

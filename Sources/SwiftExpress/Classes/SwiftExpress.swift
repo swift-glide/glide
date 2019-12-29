@@ -16,7 +16,7 @@ public final class SwiftExpress: Router {
       .serverChannelOption(localAddressReuseOption, value: 1)
       .childChannelInitializer { channel in
         channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-          channel.pipeline.addHandler(HTTPHandler(router: self))
+          channel.pipeline.addHandler(RequestHandler(router: self))
         }
       }
       .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
