@@ -2,7 +2,7 @@ import Foundation
 import NIO
 import NIOHTTP1
 
-public final class SwiftExpress {
+public final class SwiftExpress: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
   public func listen(_ port: Int) {
@@ -16,7 +16,7 @@ public final class SwiftExpress {
       .serverChannelOption(localAddressReuseOption, value: 1)
       .childChannelInitializer { channel in
         channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-          channel.pipeline.addHandler(HTTPHandler())
+          channel.pipeline.addHandler(HTTPHandler(router: self))
         }
       }
       .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
