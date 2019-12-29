@@ -4,7 +4,7 @@ public class Router {
   public func use(_ middleware: Middleware...) {
     self.middleware.append(contentsOf: middleware)
   }
-  
+
   public func get(_ path: String = "",
            middleware: @escaping Middleware) {
     use { request, response, next in
@@ -18,21 +18,39 @@ public class Router {
 
   func handle(request: Request,
               response: Response,
-              next upperNext: @escaping Next) {
+              next: @escaping Next) {
+    let stack = MiddlewareStack(stack: middleware[middleware.indices],
+                                request: request,
+                                response: response,
+                                next: next)
+    stack.step()
+  }
+}
 
-    let stack = self.middleware
-    guard !stack.isEmpty else { return upperNext() }
+extension Router {
+  final class MiddlewareStack {
+    var stack: ArraySlice<Middleware>
+    let request: Request
+    let response: Response
+    var next: Next?
 
-    var next: Next? = { (args: Any...) in }
-    var i = stack.startIndex
-
-    next = { (args: Any...) in
-      let middleware = stack[i]
-      i = stack.index(after: i)
-      middleware(request, response, i == stack.endIndex ? upperNext : next!)
+    init(stack: ArraySlice<Middleware>,
+         request: Request,
+         response: Response,
+         next: Next?) {
+      self.stack = stack
+      self.request = request
+      self.response = response
+      self.next = next
     }
 
-    next!()
+    func step(_ args: Any...) {
+      if let middleware = stack.popFirst() {
+        middleware(request, response, self.step)
+      } else {
+        next?()
+        next = nil
+      }
+    }
   }
-
 }

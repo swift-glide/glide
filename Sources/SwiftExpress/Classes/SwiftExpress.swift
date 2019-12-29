@@ -32,12 +32,12 @@ public final class SwiftExpress: Router {
         fatalError("Address was unable to bind. Please check that the socket was not closed or that the address family was understood.")
       }
 
-      print("Server running on:", localAddress)
+      print("Server running on http://localhost:\(localAddress.port)")
       try serverChannel.closeFuture.wait()
       print("Server closed")
 
     } catch {
-      fatalError("failed to start server: \(error.localizedDescription)")
+      fatalError("Failed to start server: \(error.localizedDescription)")
     }
   }
 }
