@@ -9,7 +9,8 @@ let package = Package(
       .executable(name: "sample", targets: ["Sample"])
     ],
     dependencies: [
-      .package(url: "https://github.com/apple/swift-nio", from: "2.12.0")
+      .package(url: "https://github.com/apple/swift-nio", from: "2.12.0"),
+      .package(url: "https://github.com/vapor-community/HTMLKit.git", from: "2.0.0-beta.1"),
   ],
     targets: [
       .target(
@@ -22,7 +23,8 @@ let package = Package(
           "NIO",
           "NIOFoundationCompat",
           "NIOHTTP1",
-          "NIOTLS"
+          "NIOTLS",
+          "HTMLKit"
       ]),
       .testTarget(
         name: "SwiftExpressTests",

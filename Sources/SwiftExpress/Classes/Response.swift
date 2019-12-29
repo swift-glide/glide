@@ -2,6 +2,7 @@ import NIO
 import NIOHTTP1
 import struct Foundation.Data
 import class Foundation.JSONEncoder
+import HTMLKit
 
 public class Response {
   public var status = HTTPResponseStatus.ok
@@ -9,9 +10,11 @@ public class Response {
   public let channel: Channel
   private var didWriteHeader = false
   private var didEnd = false
+  private var htmlRenderer: HTMLRenderer?
 
-  public init(channel: Channel) {
+  public init(channel: Channel, renderer: HTMLRenderer? = nil) {
     self.channel = channel
+    self.htmlRenderer = renderer
   }
 
   public func send(_ text: String) {
@@ -45,7 +48,7 @@ public class Response {
   }
 
   func handleError(_ error: Error) {
-    print("Error:", error.localizedDescription)
+    print("Response Error:", error)
     end()
   }
 
@@ -101,5 +104,31 @@ public extension Response {
     _ = channel.writeAndFlush(bodypart)
                .recover(handleError)
                .map(end)
+  }
+
+  func render<T: HTMLTemplate>(_ template: T, context: T.Context) {
+    guard let renderer = htmlRenderer else { return }
+
+    self["Content-Type"] = "text/html; charset=utf-8"
+
+    do {
+      let html = try renderer.render(raw: T.self, with: context)
+      self.send(html)
+    } catch {
+      handleError(error)
+    }
+  }
+
+  func render<T: HTMLPage>(_ page: T) {
+    guard let renderer = htmlRenderer else { return }
+
+    self["Content-Type"] = "text/html; charset=utf-8"
+
+    do {
+      let html = try renderer.render(raw: T.self)
+      self.send(html)
+    } catch {
+      handleError(error)
+    }
   }
 }
