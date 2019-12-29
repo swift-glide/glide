@@ -4,6 +4,17 @@ public class Router {
   public func use(_ middleware: Middleware...) {
     self.middleware.append(contentsOf: middleware)
   }
+  
+  public func get(_ path: String = "",
+           middleware: @escaping Middleware) {
+    use { request, response, next in
+      guard request.header.method == .GET,
+        request.header.uri.hasPrefix(path)
+        else { return next() }
+
+      middleware(request, response, next)
+    }
+  }
 
   func handle(request: Request,
               response: Response,
@@ -24,14 +35,4 @@ public class Router {
     next!()
   }
 
-  func get(_ path: String = "",
-           middleware: @escaping Middleware) {
-    use { request, response, next in
-      guard request.header.method == .GET,
-        request.header.uri.hasPrefix(path)
-        else { return next() }
-
-      middleware(request, response, next)
-    }
-  }
 }

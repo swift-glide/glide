@@ -1,3 +1,5 @@
+import SwiftExpress
+
 let app = SwiftExpress()
 
 app.use { request, response, next in

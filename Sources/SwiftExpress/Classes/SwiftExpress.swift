@@ -5,6 +5,8 @@ import NIOHTTP1
 public final class SwiftExpress: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
+  public override init() {}
+
   public func listen(_ port: Int) {
     let localAddressReuseOption = ChannelOptions.socket(
       SocketOptionLevel(SOL_SOCKET),
