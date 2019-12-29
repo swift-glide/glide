@@ -32,8 +32,6 @@ public class HTMLKit {
 
 extension SwiftExpress {
   public func useHTML(setup: (HTMLKit) -> Void) {
-    self.htmlKit = HTMLKit.shared
-
     setup(HTMLKit.shared)
 
     self.use(

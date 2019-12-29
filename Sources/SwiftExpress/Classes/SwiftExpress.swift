@@ -5,7 +5,6 @@ import HTMLKit
 
 public final class SwiftExpress: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-  public var htmlKit: HTMLKit?
 
   public override init() {}
 
