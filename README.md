@@ -41,6 +41,6 @@ app.listen(1337)
 Then in your temrinal:
 
 ```shell
-curl http://localhost:1337
+curl http://localhost:1337/hello
 # -> "Hello, 2020!"
 ```
