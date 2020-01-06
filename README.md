@@ -1,6 +1,8 @@
 # SwiftExpress
+![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) [![GitHub release](https://img.shields.io/github/release/kaishin/swift-express.svg)](https://github.com/kaishin/swift-express/releases/latest)
 
-A Swift micro-framework for server-side developement. NOT PRODUCTION READY.
+A Swift micro-framework for server-side developement.
+⚠️ Not production ready.
 
 ## Usage
 
@@ -17,7 +19,17 @@ git init
 In your `Package.swift` file, add the following line in `dependencies: [...]`:
 
 ```swift
-.package(url: "https://github.com/kaishin/swift-express", branch: "master")
+.package(url: "https://github.com/kaishin/swift-express", .branch: "master")
+```
+
+And in the `targets` section, add SwiftExpress as a depdency to your main target:
+
+```swift
+targets: [
+    .target(
+      name: APP_NAME,
+      dependencies: ["SwiftExpress"]
+    )
 ```
 
 Then, in the `main.swift` of your server-side app, add the following:
@@ -38,7 +50,21 @@ app.get("/hello") { _, response, _ in
 app.listen(1337)
 ```
 
-Then in your temrinal:
+#### Xcode
+
+Double-click your `Package.swift` file so that it opens in Xcode. Wait for the dependencies to be automatically installed then run the project.
+
+#### Command Line / Linux
+
+If you are not using Xcode, run these commands in the terminal:
+
+```shell
+swift package update
+swift build
+swift run
+```
+
+Once the project is running either via Xcode or the Swift CLI, run the following in your terminal:
 
 ```shell
 curl http://localhost:1337/hello
