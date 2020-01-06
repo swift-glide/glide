@@ -10,7 +10,7 @@ let package = Package(
     ],
     dependencies: [
       .package(url: "https://github.com/apple/swift-nio", from: "2.12.0"),
-      .package(url: "https://github.com/vapor-community/HTMLKit.git", from: "2.0.0-beta.1"),
+      .package(url: "https://github.com/kaishin/HTMLKit", from: "2.0.0-beta.3"),
   ],
     targets: [
       .target(
