@@ -19,7 +19,7 @@ git init
 In your `Package.swift` file, add the following line in `dependencies: [...]`:
 
 ```swift
-.package(url: "https://github.com/kaishin/swift-express", .branch: "master")
+.package(url: "https://github.com/kaishin/swift-express", .branch("master"))
 ```
 
 And in the `targets` section, add SwiftExpress as a depdency to your main target:
