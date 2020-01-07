@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "HTMLKit",
-        "repositoryURL": "https://github.com/vapor-community/HTMLKit.git",
+        "repositoryURL": "https://github.com/kaishin/HTMLKit",
         "state": {
           "branch": null,
-          "revision": "7cf9c3250342a93b317a1235dfeed013868c5b4b",
-          "version": "2.0.0-beta.1"
+          "revision": "db78b38d0bd0508435ac9702693777fc8ff5ea1d",
+          "version": "2.0.0-beta.3"
         }
       },
       {
