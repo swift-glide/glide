@@ -1,7 +1,6 @@
 import Foundation
 import NIO
 import NIOHTTP1
-import HTMLKit
 
 public final class SwiftExpress: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
