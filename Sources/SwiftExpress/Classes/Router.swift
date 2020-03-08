@@ -29,11 +29,11 @@ public class Router {
 
   func handle(request: Request,
               response: Response,
-              next: @escaping Next) {
+              last: @escaping Next) {
     let stack = MiddlewareStack(stack: middleware[middleware.indices],
                                 request: request,
                                 response: response,
-                                next: next)
+                                last: last)
     stack.step()
   }
 }
@@ -43,24 +43,24 @@ extension Router {
     var stack: ArraySlice<Middleware>
     let request: Request
     let response: Response
-    var next: Next?
+    var lastMiddleware: Next?
 
     init(stack: ArraySlice<Middleware>,
          request: Request,
          response: Response,
-         next: Next?) {
+         last: Next?) {
       self.stack = stack
       self.request = request
       self.response = response
-      self.next = next
+      self.lastMiddleware = last
     }
 
     func step(_ args: Any...) {
       if let middleware = stack.popFirst() {
         middleware(request, response, self.step)
       } else {
-        next?()
-        next = nil
+        lastMiddleware?()
+        lastMiddleware = nil
       }
     }
   }

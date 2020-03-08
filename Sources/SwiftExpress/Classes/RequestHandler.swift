@@ -35,11 +35,11 @@ final class RequestHandler: ChannelInboundHandler {
       let data = byteBuffer.readData(length: byteBufferSize)
       request.body = data
 
-      router.handle(request: request, response: response!) { (items: Any...) in
+    case .end:
+      router.handle(request: request!, response: response!) { (items: Any...) in
         self.response!.status = .notFound
-        self.response!.send("Page not found.")
+        self.response!.send("No middleware to handle this route.")
       }
-    case .end: break
     }
   }
 }

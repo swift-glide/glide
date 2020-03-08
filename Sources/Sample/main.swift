@@ -24,7 +24,7 @@ app.get("/hello") { _, response, _ in
 app.post("/post") { request, response, _ in
   guard let data = request.body,
     let user = try? JSONDecoder().decode(User.self, from: data) else {
-      response.send("Wrong data sent")
+      response.send("Wrong data sent.")
       return
   }
 
