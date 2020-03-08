@@ -16,10 +16,4 @@ app.get("/hello") { _, response, _ in
   response.send("Hello, world!")
 }
 
-}
-
-app.get("/static") { _, response, _ in
-  response.render(StaticPage())
-}
-
 app.listen(1337)
