@@ -1,11 +1,14 @@
 import Foundation
 import NIO
 import NIOHTTP1
+import NIOFoundationCompat
 
 final class RequestHandler: ChannelInboundHandler {
   typealias InboundIn = HTTPServerRequestPart
 
   let router: Router
+  var request: Request?
+  var response: Response?
 
   init(router: Router) {
     self.router = router
@@ -16,15 +19,26 @@ final class RequestHandler: ChannelInboundHandler {
 
     switch requestPart {
     case .head(let header):
-      let request = Request(header: header)
-      let response = Response(channel: context.channel)
+      request = Request(header: header)
+      response = Response(channel: context.channel)
+    case .body(var byteBuffer):
+      response = response ?? Response(channel: context.channel)
 
-      router.handle(request: request,
-                    response: response) { (items : Any...) in
-                      response.status = .notFound
-                      response.send("Page not found.")
+      guard let request = self.request else {
+        response!.status = .badRequest
+        response!.send("Malformed client request.")
+        return
       }
-    case .body, .end: break
+
+      let byteBufferSize = byteBuffer.readableBytes
+      let data = byteBuffer.readData(length: byteBufferSize)
+      request.body = data
+
+      router.handle(request: request, response: response!) { (items: Any...) in
+        self.response!.status = .notFound
+        self.response!.send("Page not found.")
+      }
+    case .end: break
     }
   }
 }

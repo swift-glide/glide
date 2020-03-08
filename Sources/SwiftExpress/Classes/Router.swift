@@ -16,6 +16,17 @@ public class Router {
     }
   }
 
+  public func post(_ path: String = "",
+                   middleware: @escaping Middleware) {
+    use { request, response, next in
+      guard request.header.method == .POST,
+        request.header.uri.hasPrefix(path)
+      else { return next() }
+
+      middleware(request, response, next)
+    }
+  }
+
   func handle(request: Request,
               response: Response,
               next: @escaping Next) {
