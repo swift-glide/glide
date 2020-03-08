@@ -1,7 +1,9 @@
 import NIOHTTP1
+import Foundation
 
 public final class Request {
   public let header: HTTPRequestHead
+  public var body: Data? = nil
   public var userInfo = [String: Any]()
 
   init(header: HTTPRequestHead) {
