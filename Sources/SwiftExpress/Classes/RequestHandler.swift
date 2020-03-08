@@ -21,6 +21,7 @@ final class RequestHandler: ChannelInboundHandler {
     case .head(let header):
       request = Request(header: header)
       response = Response(channel: context.channel)
+      
     case .body(var byteBuffer):
       response = response ?? Response(channel: context.channel)
 

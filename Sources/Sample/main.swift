@@ -2,6 +2,11 @@ import SwiftExpress
 import Foundation
 let app = SwiftExpress()
 
+struct User: Codable {
+  var name: String
+  var password: String
+}
+
 app.use { request, response, next in
   print("\(request.header.method):", request.header.uri)
   next()
@@ -16,10 +21,6 @@ app.get("/hello") { _, response, _ in
   response.send("Hello, world!")
 }
 
-struct User: Codable {
-  var name: String
-  var password: String
-}
 app.post("/post") { request, response, _ in
   guard let data = request.body,
     let user = try? JSONDecoder().decode(User.self, from: data) else {
