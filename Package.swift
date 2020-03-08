@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftExpress",
+    name: "swift-express",
     products: [
       .library(name: "SwiftExpress", targets: ["SwiftExpress"]),
       .executable(name: "sample", targets: ["Sample"])
