@@ -2,13 +2,11 @@ import NIO
 import NIOHTTP1
 import struct Foundation.Data
 import class Foundation.JSONEncoder
-import HTMLKit
 
 public class Response {
   public var status = HTTPResponseStatus.ok
   public var headers = HTTPHeaders()
   public let channel: Channel
-  public var htmlRenderer: HTMLRenderer?
 
   private var didWriteHeader = false
   private var didEnd = false
@@ -104,31 +102,5 @@ public extension Response {
     _ = channel.writeAndFlush(bodypart)
                .recover(handleError)
                .map(end)
-  }
-
-  func render<T: HTMLTemplate>(_ template: T, context: T.Context) {
-    guard let renderer = htmlRenderer else { return }
-
-    self["Content-Type"] = "text/html; charset=utf-8"
-
-    do {
-      let html = try renderer.render(raw: T.self, with: context)
-      self.send(html)
-    } catch {
-      handleError(error)
-    }
-  }
-
-  func render<T: HTMLPage>(_ page: T) {
-    guard let renderer = htmlRenderer else { return }
-
-    self["Content-Type"] = "text/html; charset=utf-8"
-
-    do {
-      let html = try renderer.render(raw: T.self)
-      self.send(html)
-    } catch {
-      handleError(error)
-    }
   }
 }

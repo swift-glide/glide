@@ -2,24 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "HTMLKit",
-        "repositoryURL": "https://github.com/kaishin/HTMLKit",
-        "state": {
-          "branch": null,
-          "revision": "db78b38d0bd0508435ac9702693777fc8ff5ea1d",
-          "version": "2.0.0-beta.3"
-        }
-      },
-      {
-        "package": "Lingo",
-        "repositoryURL": "https://github.com/miroslavkovac/Lingo.git",
-        "state": {
-          "branch": null,
-          "revision": "f21f388b04239641b3e88d14f21762125faa9857",
-          "version": "3.0.5"
-        }
-      },
-      {
         "package": "swift-nio",
         "repositoryURL": "https://github.com/apple/swift-nio",
         "state": {
