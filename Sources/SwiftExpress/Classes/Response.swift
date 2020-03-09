@@ -23,9 +23,9 @@ public class Response {
 
     let bodypart = HTTPServerResponsePart.body(.byteBuffer(buffer))
 
-    _ = channel.writeAndFlush(bodypart)
+    channel.writeAndFlush(bodypart)
       .recover(handleError)
-      .map(end)
+      .whenSuccess(end)
   }
 
   func flushHeader() {
@@ -41,8 +41,8 @@ public class Response {
 
     let headPart = HTTPServerResponsePart.head(head)
 
-    _ = channel.writeAndFlush(headPart)
-      .recover(handleError)
+    channel.writeAndFlush(headPart)
+      .whenFailure(handleError)
   }
 
   func handleError(_ error: Error) {
@@ -55,9 +55,10 @@ public class Response {
 
     let endpart = HTTPServerResponsePart.end(nil)
 
-    channel.writeAndFlush(endpart).whenSuccess {
-      _ = self.channel.close()
-    }
+    channel.writeAndFlush(endpart)
+      .whenSuccess {
+        self.channel.close().whenFailure(self.handleError)
+      }
   }
 }
 
@@ -99,8 +100,8 @@ public extension Response {
 
     let bodypart = HTTPServerResponsePart.body(.byteBuffer(buffer))
 
-    _ = channel.writeAndFlush(bodypart)
-               .recover(handleError)
-               .map(end)
+    channel.writeAndFlush(bodypart)
+      .recover(handleError)
+      .whenSuccess(end)
   }
 }
