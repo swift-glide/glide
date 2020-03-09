@@ -3,7 +3,7 @@ import NIO
 import NIOHTTP1
 import NIOFoundationCompat
 
-final class RequestHandler: ChannelInboundHandler {
+final class HTTPServerHandler: ChannelInboundHandler {
   typealias InboundIn = HTTPServerRequestPart
 
   let router: Router
@@ -19,7 +19,7 @@ final class RequestHandler: ChannelInboundHandler {
 
     switch requestPart {
     case .head(let header):
-      request = Request(header: header)
+      request = Request(header: header, eventLoop: context.eventLoop)
       response = Response(channel: context.channel)
       
     case .body(var byteBuffer):
@@ -36,9 +36,9 @@ final class RequestHandler: ChannelInboundHandler {
       request.body = data
 
     case .end:
-      router.handle(request: request!, response: response!) { (items: Any...) in
-        self.response!.status = .notFound
-        self.response!.send("No middleware to handle this route.")
+      router.unwind(request: request, response: response) { request, response in
+        response.status = .notFound
+        response.send("No middleware to handle this route.")
       }
     }
   }

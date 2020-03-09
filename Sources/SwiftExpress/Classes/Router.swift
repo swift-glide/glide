@@ -1,40 +1,56 @@
+import Foundation
+
 public class Router {
-  private var middleware = [Middleware]()
+  private var middlewares = [Middleware]()
 
   public func use(_ middleware: Middleware...) {
-    self.middleware.append(contentsOf: middleware)
+    self.middlewares.append(contentsOf: middleware)
   }
 
-  public func get(_ path: String = "",
-           middleware: @escaping Middleware) {
-    use { request, response, next in
+  public func get(
+    _ path: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use { request, response, nextHandler in
       guard request.header.method == .GET,
         request.header.uri.hasPrefix(path)
-        else { return next() }
+        else { return nextHandler() }
 
-      middleware(request, response, next)
+      finalize(handler)(request, response, nextHandler)
     }
   }
 
-  public func post(_ path: String = "",
-                   middleware: @escaping Middleware) {
-    use { request, response, next in
+  public func post(
+    _ path: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use { request, response, nextHandler in
       guard request.header.method == .POST,
         request.header.uri.hasPrefix(path)
-      else { return next() }
+      else { return nextHandler() }
 
-      middleware(request, response, next)
+      finalize(handler)(request, response, nextHandler)
     }
   }
 
-  func handle(request: Request,
-              response: Response,
-              last: @escaping Next) {
-    let stack = MiddlewareStack(stack: middleware[middleware.indices],
-                                request: request,
-                                response: response,
-                                last: last)
-    stack.step()
+  func unwind(
+    request: Request?,
+    response: Response?,
+    onComplete: @escaping HTTPHandler
+  ) {
+    guard let request = request,
+      let response = response else {
+        assertionFailure("Request and response were not initialized.")
+        return
+    }
+
+    MiddlewareStack(
+      stack: middlewares[middlewares.indices],
+      request: request,
+      response: response,
+      onComplete: onComplete
+    )
+    .pop()
   }
 }
 
@@ -43,24 +59,27 @@ extension Router {
     var stack: ArraySlice<Middleware>
     let request: Request
     let response: Response
-    var lastMiddleware: Next?
 
-    init(stack: ArraySlice<Middleware>,
-         request: Request,
-         response: Response,
-         last: Next?) {
+    /// Callback to call once all middlewares have been handled
+    var onComplete: HTTPHandler?
+
+    init(
+      stack: ArraySlice<Middleware>,
+      request: Request,
+      response: Response,
+      onComplete: HTTPHandler?
+    ) {
       self.stack = stack
       self.request = request
       self.response = response
-      self.lastMiddleware = last
+      self.onComplete = onComplete
     }
 
-    func step(_ args: Any...) {
+    func pop() {
       if let middleware = stack.popFirst() {
-        middleware(request, response, self.step)
+        middleware(request, response, self.pop)
       } else {
-        lastMiddleware?()
-        lastMiddleware = nil
+        onComplete?(request, response)
       }
     }
   }

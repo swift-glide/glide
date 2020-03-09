@@ -7,21 +7,16 @@ struct User: Codable {
   var password: String
 }
 
-app.use { request, response, next in
-  print("\(request.header.method):", request.header.uri)
-  next()
-}
-
 app.use(
-  parseParameters,
-  cors(allowOrigin: "*")
+  consoleLogger,
+  corsHandler(allowOrigin: "*")
 )
 
-app.get("/hello") { _, response, _ in
+app.get("/hello") { _, response in
   response.send("Hello, world!")
 }
 
-app.post("/post") { request, response, _ in
+app.post("/post") { request, response in
   guard let data = request.body,
     let user = try? JSONDecoder().decode(User.self, from: data) else {
       response.send("Wrong data sent.")

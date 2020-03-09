@@ -5,7 +5,10 @@ import NIOHTTP1
 public final class SwiftExpress: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-  public override init() {}
+  public override init() {
+    super.init()
+    use(parameterParser)
+  }
 
   public func listen(_ port: Int,
                      _ host: String = "localhost",
@@ -53,7 +56,7 @@ public final class SwiftExpress: Router {
       .serverChannelOption(localAddressReuseOption, value: 1)
       .childChannelInitializer { channel in
         channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-          channel.pipeline.addHandler(RequestHandler(router: self))
+          channel.pipeline.addHandler(HTTPServerHandler(router: self))
         }
     }
     .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
