@@ -1,6 +1,6 @@
-import SwiftExpress
 import Foundation
-let app = SwiftExpress()
+import Glide
+let app = Glide()
 
 struct User: Codable {
   var name: String
@@ -19,8 +19,8 @@ app.get("/hello") { _, response in
 app.post("/post") { request, response in
   guard let data = request.body,
     let user = try? JSONDecoder().decode(User.self, from: data) else {
-      response.send("Wrong data sent.")
-      return
+    response.send("Wrong data sent.")
+    return
   }
 
   response.send("\(user.name)")

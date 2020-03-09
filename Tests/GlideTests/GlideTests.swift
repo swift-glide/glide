@@ -1,8 +1,8 @@
-import XCTest
 import class Foundation.Bundle
-@testable import SwiftExpress
+@testable import Glide
+import XCTest
 
-final class SwiftExpressTests: XCTestCase {
+final class GlideTests: XCTestCase {
   func testExample() throws {
     let output = "Hello, world!\n"
 

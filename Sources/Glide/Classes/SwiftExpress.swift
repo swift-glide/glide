@@ -2,7 +2,7 @@ import Foundation
 import NIO
 import NIOHTTP1
 
-public final class SwiftExpress: Router {
+public final class Glide: Router {
   let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
   public override init() {
@@ -58,10 +58,10 @@ public final class SwiftExpress: Router {
         channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
           channel.pipeline.addHandler(HTTPServerHandler(router: self))
         }
-    }
-    .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
-    .childChannelOption(localAddressReuseOption, value: 1)
-    .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
+      }
+      .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
+      .childChannelOption(localAddressReuseOption, value: 1)
+      .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
 
     return bootstrap
 

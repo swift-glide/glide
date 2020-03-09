@@ -1,7 +1,7 @@
-# SwiftExpress
+# Glide
 ![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) [![GitHub release](https://img.shields.io/github/release/kaishin/swift-express.svg)](https://github.com/kaishin/swift-express/releases/latest)
 
-A Swift micro-framework for server-side developement.
+A Swift micro-framework for server-side development.
 ⚠️ Not production ready.
 
 ## Usage
@@ -22,13 +22,13 @@ In your `Package.swift` file, add the following line in `dependencies: [...]`:
 .package(url: "https://github.com/kaishin/swift-express", .branch("master"))
 ```
 
-And in the `targets` section, add SwiftExpress as a depdency to your main target:
+And in the `targets` section, add Glide as a depdency to your main target:
 
 ```swift
 targets: [
     .target(
       name: APP_NAME,
-      dependencies: ["SwiftExpress"]
+      dependencies: ["Glide"]
     )
 ```
 
@@ -36,10 +36,10 @@ Then, in the `main.swift` of your server-side app, add the following:
 
 ```swift
 // 1. Import the framework
-import SwiftExpress 
+import Glide
 
 // 2. Instantiate the app
-let app = SwiftExpress() 
+let app = Glide()
 
 // 3. Add a route.
 app.get("/hello") { _, response, _ in
