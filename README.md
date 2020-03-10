@@ -70,3 +70,15 @@ Once the project is running either via Xcode or the Swift CLI, run the following
 curl http://localhost:1337/hello
 # -> "Hello, 2020!"
 ```
+
+## Roadmap
+
+- Add error middleware.
+- Add support for templating packages.
+- Add support for sessions & cookies.
+- Add support for static file.
+- Add support for uploads.
+- Add support for redirects.
+- Add support for state storage.
+- Add support for Web forms.
+- Add support for type-safe request parameters.
