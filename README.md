@@ -1,5 +1,5 @@
 # Glide
-![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) [![GitHub release](https://img.shields.io/github/release/kaishin/glide.svg)](https://github.com/kaishin/glide/releases/latest)
+![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) [![GitHub release](https://img.shields.io/github/release/kaishin/glide.svg)](https://github.com/kaishin/glide/releases/latest) ![CI](https://github.com/kaishin/glide/workflows/Test/badge.svg)
 
 A Swift micro-framework for server-side development.
 ⚠️ Not production ready.
