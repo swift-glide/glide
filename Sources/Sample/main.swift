@@ -1,11 +1,7 @@
 import Foundation
 import Glide
-let app = Glide()
 
-struct User: Codable {
-  var name: String
-  var password: String
-}
+let app = Glide()
 
 app.use(
   consoleLogger,
@@ -27,3 +23,8 @@ app.post("/post") { request, response in
 }
 
 app.listen(1337)
+
+struct User: Codable {
+  var name: String
+  var password: String
+}

@@ -1,5 +1,5 @@
 # Glide
-![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) [![GitHub release](https://img.shields.io/github/release/kaishin/swift-express.svg)](https://github.com/kaishin/swift-express/releases/latest)
+![Swift 5.1](https://img.shields.io/badge/Swift-5.1-orange.svg) [![GitHub release](https://img.shields.io/github/release/kaishin/glide.svg)](https://github.com/kaishin/glide/releases/latest)
 
 A Swift micro-framework for server-side development.
 ⚠️ Not production ready.
@@ -19,7 +19,7 @@ git init
 In your `Package.swift` file, add the following line in `dependencies: [...]`:
 
 ```swift
-.package(url: "https://github.com/kaishin/swift-express", .branch("master"))
+.package(url: "https://github.com/kaishin/glide", .branch("master"))
 ```
 
 And in the `targets` section, add Glide as a depdency to your main target:

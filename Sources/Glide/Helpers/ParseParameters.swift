@@ -1,6 +1,6 @@
 import Foundation
 
-let requestParameterKey = "com.redalemeden.swift-express.parameter"
+let requestParameterKey = "com.redalemeden.glide.parameter"
 
 public let parameterParser = {
   passthrough { request, response in
