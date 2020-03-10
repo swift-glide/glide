@@ -6,6 +6,17 @@ struct User: Codable {
   var password: String
 }
 
+enum CustomError: Error {
+  case missingUser
+
+  var localizedDescription: String {
+    switch self {
+    case .missingUser:
+      return "The user seems to be missing"
+    }
+  }
+}
+
 let app = Glide()
 
 app.use(
@@ -18,11 +29,11 @@ app.get("/hello") { _, response in
 }
 
 app.post("/post") { request, response in
-  guard let data = request.body,
-    let user = try? JSONDecoder().decode(User.self, from: data) else {
-    response.send("Wrong data sent.")
-    return
+  guard let data = request.body else {
+    throw CustomError.missingUser
   }
+
+  let user = try JSONDecoder().decode(User.self, from: data)
 
   response.send("\(user.name)")
 }

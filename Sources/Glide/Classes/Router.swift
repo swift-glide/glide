@@ -16,7 +16,7 @@ public class Router {
         request.header.uri.hasPrefix(path)
         else { return nextHandler() }
 
-      finalize(handler)(request, response, nextHandler)
+      try finalize(handler)(request, response, nextHandler)
     }
   }
 
@@ -29,14 +29,13 @@ public class Router {
         request.header.uri.hasPrefix(path)
       else { return nextHandler() }
 
-      finalize(handler)(request, response, nextHandler)
+      try finalize(handler)(request, response, nextHandler)
     }
   }
 
   func unwind(
     request: Request?,
-    response: Response?,
-    onComplete: @escaping HTTPHandler
+    response: Response?
   ) {
     guard let request = request,
       let response = response else {
@@ -47,10 +46,15 @@ public class Router {
     MiddlewareStack(
       stack: middlewares[middlewares.indices],
       request: request,
-      response: response,
-      onComplete: onComplete
+      response: response
     )
     .pop()
+  }
+}
+
+extension Router {
+  struct ErrorResponse: Codable {
+    var error: String
   }
 }
 
@@ -60,26 +64,29 @@ extension Router {
     let request: Request
     let response: Response
 
-    /// Callback to call once all middlewares have been handled
-    var onComplete: HTTPHandler?
-
     init(
       stack: ArraySlice<Middleware>,
       request: Request,
-      response: Response,
-      onComplete: HTTPHandler?
+      response: Response
     ) {
       self.stack = stack
       self.request = request
       self.response = response
-      self.onComplete = onComplete
     }
 
     func pop() {
       if let middleware = stack.popFirst() {
-        middleware(request, response, self.pop)
+        do {
+          try middleware(request, response, self.pop)
+        } catch {
+          response.status = .internalServerError
+          response.json(
+            ErrorResponse(error: error.localizedDescription)
+          )
+        }
       } else {
-        onComplete?(request, response)
+        response.status = .notFound
+        response.json(ErrorResponse(error: "Unhandled route error."))
       }
     }
   }
