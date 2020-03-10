@@ -19,4 +19,4 @@ jobs:
     - name: Run tests
       run: swift test --enable-test-discovery --enable-code-coverage --sanitize=thread
     - name: Code Coverage
-      uses: mattpolzin/swift-codecov-action@0.6.0
+      uses: mattpolzin/swift-codecov-action@0.3.0
