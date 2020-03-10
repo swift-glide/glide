@@ -5,6 +5,8 @@ import AsyncHTTPClient
 import XCTest
 @testable import Glide
 
+let testPort = 8070
+
 final class GlideTests: XCTestCase {
   func testPing() throws {
     let app = Glide(.testing)
