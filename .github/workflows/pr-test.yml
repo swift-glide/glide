@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     container: 
-      image: swift:5.1-bionic
+      image: vapor/swift:5.1-bionic
     runs-on: ubuntu-latest
 
     steps:
