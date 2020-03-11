@@ -2,9 +2,18 @@ import Foundation
 
 public class Router {
   private var middlewares = [Middleware]()
+  private var errorHandlers = [ErrorHandler]()
 
   public func use(_ middleware: Middleware...) {
     self.middlewares.append(contentsOf: middleware)
+  }
+
+  public func use(_ errorHandler: ErrorHandler...) {
+    self.errorHandlers.append(contentsOf: errorHandler)
+  }
+
+  public func handleErrors(_ errorHandler: ErrorHandler...) {
+    self.errorHandlers.append(contentsOf: errorHandler)
   }
 
   public func get(
@@ -16,7 +25,7 @@ public class Router {
         request.header.uri.hasPrefix(path)
         else { return nextHandler() }
 
-      finalize(handler)(request, response, nextHandler)
+      try finalize(handler)(request, response, nextHandler)
     }
   }
 
@@ -29,14 +38,13 @@ public class Router {
         request.header.uri.hasPrefix(path)
       else { return nextHandler() }
 
-      finalize(handler)(request, response, nextHandler)
+      try finalize(handler)(request, response, nextHandler)
     }
   }
 
   func unwind(
     request: Request?,
-    response: Response?,
-    onComplete: @escaping HTTPHandler
+    response: Response?
   ) {
     guard let request = request,
       let response = response else {
@@ -46,40 +54,60 @@ public class Router {
 
     MiddlewareStack(
       stack: middlewares[middlewares.indices],
+      errorHandlers: errorHandlers[errorHandlers.indices],
       request: request,
-      response: response,
-      onComplete: onComplete
+      response: response
     )
     .pop()
   }
 }
 
 extension Router {
+  struct ErrorResponse: Codable {
+    var error: String
+  }
+}
+
+extension Router {
   final class MiddlewareStack {
     var stack: ArraySlice<Middleware>
+    var errorHandlers: ArraySlice<ErrorHandler>
+    var errors = [Error]()
     let request: Request
     let response: Response
 
-    /// Callback to call once all middlewares have been handled
-    var onComplete: HTTPHandler?
-
     init(
       stack: ArraySlice<Middleware>,
+      errorHandlers: ArraySlice<ErrorHandler>,
       request: Request,
-      response: Response,
-      onComplete: HTTPHandler?
+      response: Response
     ) {
       self.stack = stack
+      self.errorHandlers = errorHandlers
       self.request = request
       self.response = response
-      self.onComplete = onComplete
     }
 
     func pop() {
       if let middleware = stack.popFirst() {
-        middleware(request, response, self.pop)
+        do {
+          try middleware(request, response, self.pop)
+        } catch {
+          errors.append(error)
+
+          switch error {
+          case let error as AbortError:
+            errorHandler([error], request, response)
+          default:
+            pop()
+          }
+        }
       } else {
-        onComplete?(request, response)
+        errorHandlers.forEach {
+          $0(errors, request, response)
+        }
+
+        errorHandler([InternalError.unhandledRoute], request, response)
       }
     }
   }

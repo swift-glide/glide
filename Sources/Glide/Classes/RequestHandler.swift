@@ -36,10 +36,7 @@ final class HTTPServerHandler: ChannelInboundHandler {
       request.body = data
 
     case .end:
-      router.unwind(request: request, response: response) { request, response in
-        response.status = .notFound
-        response.send("No middleware to handle this route.")
-      }
+      router.unwind(request: request, response: response)
     }
   }
 }
