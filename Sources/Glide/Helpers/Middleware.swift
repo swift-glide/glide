@@ -4,6 +4,7 @@ let requestParameterKey = "com.redalemeden.glide.parameter"
 
 public typealias Handler = () -> Void
 public typealias HTTPHandler = (Request, Response) throws -> Void
+public typealias ErrorHandler = ([Error], Request, Response) -> Void
 
 public typealias Middleware = (
   _ request: Request,
@@ -44,6 +45,12 @@ public let consoleLogger = {
   }
 }()
 
+public let errorLogger: ErrorHandler = { errors, request, response in
+  errors.forEach {
+    print("Error:", $0.localizedDescription)
+  }
+}
+
 public func corsHandler(allowOrigin origin: String) -> Middleware {
   { request, response, nextHandler in
     response["Access-Control-Allow-Origin"] = origin
@@ -59,6 +66,4 @@ public func corsHandler(allowOrigin origin: String) -> Middleware {
   }
 }
 
-public let errorHandler = {
-45
-}()
+

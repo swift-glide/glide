@@ -2,9 +2,14 @@ import Foundation
 
 public class Router {
   private var middlewares = [Middleware]()
+  private var errorHandlers = [ErrorHandler]()
 
   public func use(_ middleware: Middleware...) {
     self.middlewares.append(contentsOf: middleware)
+  }
+
+  public func catchError(_ errorHandler: ErrorHandler...) {
+    self.errorHandlers.append(contentsOf: errorHandler)
   }
 
   public func get(
@@ -45,6 +50,7 @@ public class Router {
 
     MiddlewareStack(
       stack: middlewares[middlewares.indices],
+      errorHandlers: errorHandlers[errorHandlers.indices],
       request: request,
       response: response
     )
@@ -61,15 +67,19 @@ extension Router {
 extension Router {
   final class MiddlewareStack {
     var stack: ArraySlice<Middleware>
+    var errorHandlers: ArraySlice<ErrorHandler>
+    var errors = [Error]()
     let request: Request
     let response: Response
 
     init(
       stack: ArraySlice<Middleware>,
+      errorHandlers: ArraySlice<ErrorHandler>,
       request: Request,
       response: Response
     ) {
       self.stack = stack
+      self.errorHandlers = errorHandlers
       self.request = request
       self.response = response
     }
@@ -79,14 +89,21 @@ extension Router {
         do {
           try middleware(request, response, self.pop)
         } catch {
-          response.status = .internalServerError
-          response.json(
-            ErrorResponse(error: error.localizedDescription)
-          )
+          errors.append(error)
+
+          switch error {
+          case let error as AbortError:
+            errorHandler([error], request, response)
+          default:
+            pop()
+          }
         }
       } else {
-        response.status = .notFound
-        response.json(ErrorResponse(error: "Unhandled route error."))
+        errorHandlers.forEach {
+          $0(errors, request, response)
+        }
+
+        errorHandler([InternalError.unhandledRoute], request, response)
       }
     }
   }
