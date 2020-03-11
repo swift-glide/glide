@@ -44,7 +44,7 @@ app.use(
   corsHandler(allowOrigin: "*")
 )
 
-app.catchErrors(errorLogger, { errors, _, _ in
+app.use(errorLogger, { errors, _, _ in
   print(errors.count)
 })
 

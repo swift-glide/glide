@@ -47,7 +47,7 @@ final class ErrorHandlerTests: GlideTestCase {
         throw CustomError.someError
       }
 
-      app.catchErrors { errors, _, _ in
+      app.handleErrors { errors, _, _ in
         caughtError = errors.first as? CustomError
       }
 
