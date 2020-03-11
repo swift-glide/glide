@@ -8,7 +8,7 @@ public class Router {
     self.middlewares.append(contentsOf: middleware)
   }
 
-  public func catchError(_ errorHandler: ErrorHandler...) {
+  public func catchErrors(_ errorHandler: ErrorHandler...) {
     self.errorHandlers.append(contentsOf: errorHandler)
   }
 
