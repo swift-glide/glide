@@ -5,18 +5,13 @@ import NIO
 public final class Request {
   public let header: HTTPRequestHead
   public var body: Data? = nil
-  public var userInfo = [String: Any]()
+  public var pathParameters = Parameters(storage: [:])
+  public var queryParameters = Parameters(storage: [:])
+  public var userInfo = [AnyHashable: Any]()
   public let eventLoop: EventLoop
 
   init(header: HTTPRequestHead, eventLoop: EventLoop) {
     self.header = header
     self.eventLoop = eventLoop
-  }
-}
-
-public extension Request {
-  func parameter(_ id: String) -> String? {
-    let parameters = userInfo[requestParameterKey] as? [String: String]
-    return parameters?[id]
   }
 }
