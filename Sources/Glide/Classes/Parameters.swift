@@ -4,23 +4,23 @@ import Foundation
 public struct Parameters {
   var storage = [String: ParameterRepresentable]()
 
-  subscript(dynamicMember member: String) -> Int? {
+  public subscript(dynamicMember member: String) -> Int? {
     storage[member]?.asInt()
   }
 
-  subscript(dynamicMember member: String) -> String? {
+  public subscript(dynamicMember member: String) -> String? {
     storage[member]?.asString()
   }
 
-  subscript(dynamicMember member: String) -> Double? {
+  public subscript(dynamicMember member: String) -> Double? {
     storage[member]?.asDouble()
   }
 
-  subscript(dynamicMember member: String) -> Float? {
+  public subscript(dynamicMember member: String) -> Float? {
     storage[member]?.asFloat()
   }
 
-  subscript(dynamicMember member: String) -> Bool? {
+  public subscript(dynamicMember member: String) -> Bool? {
     storage[member]?.asBool()
   }
 }

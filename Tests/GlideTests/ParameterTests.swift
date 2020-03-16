@@ -5,7 +5,7 @@ import AsyncHTTPClient
 import XCTest
 @testable import Glide
 
-final class ParameterTests: GlideTestCase {
+final class ParameterTests: GlideTests {
   func testQueryParameterString() throws {
     let path = "/query"
     let expectation = XCTestExpectation()

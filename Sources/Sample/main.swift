@@ -60,8 +60,8 @@ app.get("/abort") { _, _ in
   throw CustomAbortError.badCredentials
 }
 
-app.get("/hello") { _, response in
-  response.send("Hello, world!")
+app.get("hello", .string("name")) { request, response in
+  response.send("Hello, \(request.pathParameters.name ?? "world")!")
 }
 
 app.post("/post") { request, response in

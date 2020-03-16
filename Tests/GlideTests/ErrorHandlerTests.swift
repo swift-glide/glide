@@ -5,7 +5,7 @@ import AsyncHTTPClient
 import XCTest
 @testable import Glide
 
-final class ErrorHandlerTests: GlideTestCase {
+final class ErrorHandlerTests: GlideTests {
   func testUnhandledRoute() throws {
     let path = "/unhandled"
     let expectation = XCTestExpectation()

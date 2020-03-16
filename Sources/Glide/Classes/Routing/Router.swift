@@ -8,40 +8,6 @@ public class Router {
     self.middlewares.append(contentsOf: middleware)
   }
 
-  public func use(_ errorHandler: ErrorHandler...) {
-    self.errorHandlers.append(contentsOf: errorHandler)
-  }
-
-  public func handleErrors(_ errorHandler: ErrorHandler...) {
-    self.errorHandlers.append(contentsOf: errorHandler)
-  }
-
-  public func get(
-    _ path: String = "",
-    handler: @escaping HTTPHandler
-  ) {
-    use { request, response, nextHandler in
-      guard request.header.method == .GET,
-        request.header.uri.hasPrefix(path)
-        else { return nextHandler() }
-
-      try finalize(handler)(request, response, nextHandler)
-    }
-  }
-
-  public func post(
-    _ path: String = "",
-    handler: @escaping HTTPHandler
-  ) {
-    use { request, response, nextHandler in
-      guard request.header.method == .POST,
-        request.header.uri.hasPrefix(path)
-      else { return nextHandler() }
-
-      try finalize(handler)(request, response, nextHandler)
-    }
-  }
-
   func unwind(
     request: Request?,
     response: Response?
@@ -60,6 +26,72 @@ public class Router {
     )
     .pop()
   }
+}
+// MARK: - Error Handling
+extension Router {
+  public func use(_ errorHandler: ErrorHandler...) {
+    self.errorHandlers.append(contentsOf: errorHandler)
+  }
+
+  public func handleErrors(_ errorHandler: ErrorHandler...) {
+    self.errorHandlers.append(contentsOf: errorHandler)
+  }
+}
+
+// MARK: - HTTP Methods
+extension Router {
+  public func get(
+    _ pathLiteral: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use { request, response, nextHandler in
+      guard request.header.method == .GET else { return nextHandler() }
+
+      let pathBuilder = PathBuilder(segments: pathSegmentParser.run(pathLiteral).match ?? [])
+      let (isMatching, pathParameters) = pathBuilder.match(request.header.uri)
+
+      if isMatching {
+        request.pathParameters = .init(storage: pathParameters)
+        try finalize(handler)(request, response, nextHandler)
+      } else {
+        return nextHandler()
+      }
+    }
+  }
+
+
+  public func get(
+    _ segments: PathSegmentDescriptor...,
+    handler: @escaping HTTPHandler
+  ) {
+    use { request, response, nextHandler in
+      guard request.header.method == .GET else { return nextHandler() }
+
+      let pathBuilder = PathBuilder(segments: segments)
+      let (isMatching, pathParameters) = pathBuilder.match(request.header.uri)
+
+      if isMatching {
+        request.pathParameters = .init(storage: pathParameters)
+        try finalize(handler)(request, response, nextHandler)
+      } else {
+        return nextHandler()
+      }
+    }
+  }
+
+  public func post(
+    _ path: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use { request, response, nextHandler in
+      guard request.header.method == .POST,
+        request.header.uri.hasPrefix(path)
+      else { return nextHandler() }
+
+      try finalize(handler)(request, response, nextHandler)
+    }
+  }
+
 }
 
 extension Router {

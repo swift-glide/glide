@@ -1,6 +1,6 @@
 import Foundation
 
-enum PathSegmentDescriptor {
+public enum PathSegmentDescriptor: Equatable {
   case fixed(String)
   case int(String)
   case string(String)
@@ -39,4 +39,17 @@ enum PathSegmentDescriptor {
   }
 }
 
+extension PathSegmentDescriptor: ExpressibleByStringLiteral {
+  public init(stringLiteral value: String) {
+    self = .fixed(value)
+  }
+}
+
 let pathToken = charactersBetween(start: "{", end: "}")
+
+let pathSegmentParser = zeroOrMore(
+  prefix(while: { $0 != "/"}),
+  separatedBy: literalParser("/"))
+  .map { strings in
+    strings.compactMap(PathSegmentDescriptor.init)
+}

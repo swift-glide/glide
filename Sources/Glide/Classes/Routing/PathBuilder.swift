@@ -34,7 +34,7 @@ struct PathBuilder {
       }
     }
 
-    return (segments.count <= urlComponents.segments.count, parameters)
+    return (segments.count == urlComponents.segments.count, parameters)
   }
 }
 
