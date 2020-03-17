@@ -5,9 +5,9 @@ struct PathBuilder {
 
   func match(_ url: String) -> (
     isMatching: Bool,
-    parametersDict: [String: ParameterRepresentable]
+    parameters: Parameters
     ) {
-    var parameters = [String: ParameterRepresentable]()
+    var parameters = Parameters()
 
     guard let urlComponents = URLComponents(string: url) else {
       return (false, parameters)
@@ -17,7 +17,7 @@ struct PathBuilder {
 
     for match in matches {
       switch match.0 {
-      case .fixed(let value):
+      case .constant(let value):
         if value != match.1 {
           return (false, parameters)
         }
@@ -29,8 +29,10 @@ struct PathBuilder {
         }
       case .string(let name):
         parameters[name] = match.1
-      default:
-        continue
+      case .wildcard:
+        parameters.wildcards.append(match.1)
+      case .matchAll:
+        return (true, parameters)
       }
     }
 

@@ -1,4 +1,5 @@
 import Foundation
+import NIOHTTP1
 
 public class Router {
   private var middlewares = [Middleware]()
@@ -44,51 +45,124 @@ extension Router {
     _ pathLiteral: String = "",
     handler: @escaping HTTPHandler
   ) {
-    use { request, response, nextHandler in
-      guard request.header.method == .GET else { return nextHandler() }
-
-      let pathBuilder = PathBuilder(segments: pathSegmentParser.run(pathLiteral).match ?? [])
-      let (isMatching, pathParameters) = pathBuilder.match(request.header.uri)
-
-      if isMatching {
-        request.pathParameters = .init(storage: pathParameters)
-        try finalize(handler)(request, response, nextHandler)
-      } else {
-        return nextHandler()
-      }
-    }
+    use(
+      generate(with: pathLiteral, and: handler)
+    )
   }
-
 
   public func get(
     _ segments: PathSegmentDescriptor...,
     handler: @escaping HTTPHandler
   ) {
-    use { request, response, nextHandler in
-      guard request.header.method == .GET else { return nextHandler() }
+    use(
+      generate(with: segments, and: handler)
+    )
+  }
 
-      let pathBuilder = PathBuilder(segments: segments)
-      let (isMatching, pathParameters) = pathBuilder.match(request.header.uri)
+  public func post(
+    _ pathLiteral: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.POST, with: pathLiteral, and: handler)
+    )
+  }
+
+  public func post(
+    _ segments: PathSegmentDescriptor...,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.POST, with: segments, and: handler)
+    )
+  }
+
+  public func put(
+    _ pathLiteral: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.PUT, with: pathLiteral, and: handler)
+    )
+  }
+
+  public func put(
+    _ segments: PathSegmentDescriptor...,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.PUT, with: segments, and: handler)
+    )
+  }
+
+  public func patch(
+    _ pathLiteral: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.PATCH, with: pathLiteral, and: handler)
+    )
+  }
+
+  public func patch(
+    _ segments: PathSegmentDescriptor...,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.PATCH, with: segments, and: handler)
+    )
+  }
+
+  public func delete(
+    _ pathLiteral: String = "",
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.DELETE, with: pathLiteral, and: handler)
+    )
+  }
+
+  public func delete(
+    _ segments: PathSegmentDescriptor...,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.DELETE, with: segments, and: handler)
+    )
+  }
+
+  private func generate(
+    _ method: HTTPMethod = .GET,
+    with pathLiteral: String = "",
+    and handler: @escaping HTTPHandler
+  ) -> Middleware {
+    generate(method, with: PathBuilder(segments: pathSegmentParser.run(pathLiteral).match ?? []), and: handler)
+  }
+
+  private func generate(
+    _ method: HTTPMethod = .GET,
+    with segments: [PathSegmentDescriptor],
+    and handler: @escaping HTTPHandler
+  ) -> Middleware {
+    generate(method, with: PathBuilder(segments: segments), and: handler)
+  }
+
+  private func generate(
+    _ method: HTTPMethod = .GET,
+    with builder: PathBuilder,
+    and handler: @escaping HTTPHandler
+  ) -> Middleware {
+    { request, response, nextHandler in
+      guard request.header.method == method else { return nextHandler() }
+
+      let (isMatching, parameters) = builder.match(request.header.uri)
 
       if isMatching {
-        request.pathParameters = .init(storage: pathParameters)
+        request.pathParameters = parameters
         try finalize(handler)(request, response, nextHandler)
       } else {
         return nextHandler()
       }
-    }
-  }
-
-  public func post(
-    _ path: String = "",
-    handler: @escaping HTTPHandler
-  ) {
-    use { request, response, nextHandler in
-      guard request.header.method == .POST,
-        request.header.uri.hasPrefix(path)
-      else { return nextHandler() }
-
-      try finalize(handler)(request, response, nextHandler)
     }
   }
 

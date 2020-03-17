@@ -2,7 +2,22 @@ import Foundation
 
 @dynamicMemberLookup
 public struct Parameters {
-  var storage = [String: ParameterRepresentable]()
+  private var storage = [String: ParameterRepresentable]()
+  var wildcards = [Substring]()
+
+  init(storage: [String: ParameterRepresentable] = [:]) {
+    self.storage = storage
+  }
+
+  public subscript(index: String) -> ParameterRepresentable? {
+    get {
+      storage[index]
+    }
+
+    set(new) {
+      storage[index] = new
+    }
+  }
 
   public subscript(dynamicMember member: String) -> Int? {
     storage[member]?.asInt()
@@ -25,7 +40,7 @@ public struct Parameters {
   }
 }
 
-protocol ParameterRepresentable: CustomStringConvertible {
+public protocol ParameterRepresentable: CustomStringConvertible {
   init?(_ string: String)
 }
 

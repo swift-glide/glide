@@ -27,7 +27,9 @@ class GlideTests: XCTestCase {
       XCTFail("Could not run the test.")
     }
   }
-  
+}
+
+class AppTests: GlideTests {  
   func testPing() throws {
     let path = "/ping"
     let expectation = XCTestExpectation()

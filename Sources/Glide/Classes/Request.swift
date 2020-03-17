@@ -5,8 +5,8 @@ import NIO
 public final class Request {
   public let header: HTTPRequestHead
   public var body: Data? = nil
-  public var pathParameters = Parameters(storage: [:])
-  public var queryParameters = Parameters(storage: [:])
+  public var pathParameters = Parameters()
+  public var queryParameters = Parameters()
   public var userInfo = [AnyHashable: Any]()
   public let eventLoop: EventLoop
 

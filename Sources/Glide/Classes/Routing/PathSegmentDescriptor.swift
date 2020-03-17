@@ -1,11 +1,11 @@
 import Foundation
 
 public enum PathSegmentDescriptor: Equatable {
-  case fixed(String)
+  case constant(String)
   case int(String)
   case string(String)
-  case anything
-  case catchall
+  case wildcard
+  case matchAll
 
   init?(_ string: Substring) {
     if string.isEmpty { return nil }
@@ -17,31 +17,32 @@ public enum PathSegmentDescriptor: Equatable {
       let rest = parsed.rest
       let match = String(parsed.match ?? "")
 
-       if rest == ":int" {
-         self = .int(match)
-       } else if rest == ":string" {
-         self = .string(match)
-       } else {
-         self = .string(match)
-       }
+      switch match {
+      case "*":
+        self = .wildcard
+        return
+      case "**":
+        self = .matchAll
+        return
+      default:
+        switch rest {
+        case ":int":
+          self = .int(match)
+        case ":string":
+          self = .string(match)
+        default:
+          self = .string(match)
+        }
+      }
     } else {
-      self = .fixed(String(string))
-    }
-  }
-
-  var optional: Bool {
-    switch self {
-    case .anything, .catchall:
-      return true
-    default:
-      return false
+      self = .constant(String(string))
     }
   }
 }
 
 extension PathSegmentDescriptor: ExpressibleByStringLiteral {
   public init(stringLiteral value: String) {
-    self = .fixed(value)
+    self = .constant(value)
   }
 }
 

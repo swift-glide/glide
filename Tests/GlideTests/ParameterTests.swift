@@ -14,7 +14,7 @@ final class ParameterTests: GlideTests {
       app.get(path) { request, response in
         response.send(request.queryParameters.foo ?? "")
 
-        XCTAssertEqual(request.queryParameters.storage["foo"]?.asString(), "bar")
+        XCTAssertEqual(request.queryParameters["foo"]?.asString(), "bar")
         XCTAssertEqual(request.queryParameters.baz, "qux")
         expectation.fulfill()
       }
@@ -39,16 +39,16 @@ final class ParameterTests: GlideTests {
       app.get(path) { request, response in
         response.send(request.queryParameters.foo ?? "")
 
-        XCTAssertEqual(request.queryParameters.storage["foo"]?.asInt(), 12)
+        XCTAssertEqual(request.queryParameters["foo"]?.asInt(), 12)
         XCTAssertEqual(request.queryParameters.foo, 12)
 
-        XCTAssertEqual(request.queryParameters.storage["bar"]?.asDouble(), 10.9)
+        XCTAssertEqual(request.queryParameters["bar"]?.asDouble(), 10.9)
         XCTAssertEqual(request.queryParameters.bar, 10.9)
 
-        XCTAssertEqual(request.queryParameters.storage["baz"]?.asFloat(), Float(10))
+        XCTAssertEqual(request.queryParameters["baz"]?.asFloat(), Float(10))
         XCTAssertEqual(request.queryParameters.baz, Float(10))
 
-        XCTAssertNotNil(request.queryParameters.storage["qux"])
+        XCTAssertNotNil(request.queryParameters["qux"])
 
         expectation.fulfill()
       }
@@ -73,10 +73,10 @@ final class ParameterTests: GlideTests {
       app.get(path) { request, response in
         response.send(request.queryParameters.foo ?? "")
 
-        XCTAssertEqual(request.queryParameters.storage["foo"]?.asBool(), true)
+        XCTAssertEqual(request.queryParameters["foo"]?.asBool(), true)
         XCTAssertTrue(request.queryParameters.foo ?? false)
 
-        XCTAssertEqual(request.queryParameters.storage["baz"]?.asBool(), false)
+        XCTAssertEqual(request.queryParameters["baz"]?.asBool(), false)
         XCTAssertFalse(request.queryParameters.baz ?? true)
 
         XCTAssertNotEqual(request.queryParameters.bar, false)

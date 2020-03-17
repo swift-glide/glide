@@ -10,10 +10,18 @@ final class RoutingTests: GlideTests {
     let literal = "/hello/{foo}/{bar:string}/baz/{qux:int}/"
     let segments = pathSegmentParser.run(literal).match ?? []
     XCTAssertFalse(segments.isEmpty)
-    XCTAssertEqual(segments[0], .fixed("hello"))
+    XCTAssertEqual(segments[0], .constant("hello"))
     XCTAssertEqual(segments[1], .string("foo"))
     XCTAssertEqual(segments[2], .string("bar"))
     XCTAssertEqual(segments[4], .int("qux"))
+  }
+
+  func testPathBuilderWildcards() throws {
+    let literal = "/hello/{*}/bar/{*}/baz"
+    let segments = pathSegmentParser.run(literal).match ?? []
+    XCTAssertFalse(segments.isEmpty)
+    XCTAssertEqual(segments[1], .wildcard)
+    XCTAssertEqual(segments[3], .wildcard)
   }
 
   func testPathMatching() throws {
@@ -98,6 +106,55 @@ final class RoutingTests: GlideTests {
       XCTAssertNotNil(error)
       XCTAssertEqual(error!.error, "No middleware found to handle this route.")
       expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 5)
+  }
+
+  func testPathLiteralWildcard() throws {
+    let path = "/hello/{*}/bar/{*}/baz"
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get(path) { request, response in
+        response.send(request.pathParameters.foo ?? "")
+        XCTAssertEqual(request.pathParameters.wildcards.count, 2)
+        XCTAssertEqual(request.pathParameters.wildcards[0], "foo")
+        XCTAssertEqual(request.pathParameters.wildcards[1], "qux")
+
+        expectation.fulfill()
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/hello/foo/bar/qux/baz",
+        method: .GET,
+        headers: .init()
+      )
+
+      _ = try client.execute(request: request).wait()
+    }
+
+    wait(for: [expectation], timeout: 5)
+  }
+
+  func testPathMatchAll() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get("hello", .string("param"), .matchAll, .string("never")) { request, response in
+        response.send(request.pathParameters.foo ?? "")
+        XCTAssertEqual(request.pathParameters.param, "foo")
+        XCTAssertNil(request.pathParameters["never"]?.asString())
+        expectation.fulfill()
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/hello/foo/bar/baz",
+        method: .GET,
+        headers: .init()
+      )
+
+      _ = try client.execute(request: request).wait()
     }
 
     wait(for: [expectation], timeout: 5)
