@@ -49,7 +49,7 @@ app.use(errorLogger, { errors, _, _ in
 })
 
 app.use { _, _, _ in
-throw CustomError.missingUser
+  throw CustomError.missingUser
 }
 
 app.get("/throw") { _, _ in

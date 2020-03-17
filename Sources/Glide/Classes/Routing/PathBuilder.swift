@@ -1,6 +1,13 @@
 import Foundation
 
-struct PathBuilder {
+public protocol PathMatching {
+  func match(_ url: String) -> (
+    isMatching: Bool,
+    parameters: Parameters
+  )
+}
+
+struct PathBuilder: PathMatching {
   var segments = [PathSegmentDescriptor]()
 
   func match(_ url: String) -> (
