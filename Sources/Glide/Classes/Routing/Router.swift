@@ -41,6 +41,7 @@ extension Router {
 
 // MARK: - HTTP Methods
 extension Router {
+  // MARK: Get
   public func get(
     _ pathLiteral: String = "",
     handler: @escaping HTTPHandler
@@ -59,6 +60,16 @@ extension Router {
     )
   }
 
+  public func get(
+    _ pathMatcher: PathMatching,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(with: pathMatcher, and: handler)
+    )
+  }
+
+  // MARK: Post
   public func post(
     _ pathLiteral: String = "",
     handler: @escaping HTTPHandler
@@ -77,6 +88,16 @@ extension Router {
     )
   }
 
+  public func post(
+    _ pathMatcher: PathMatching,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.POST, with: pathMatcher, and: handler)
+    )
+  }
+
+  // MARK: Put
   public func put(
     _ pathLiteral: String = "",
     handler: @escaping HTTPHandler
@@ -95,6 +116,16 @@ extension Router {
     )
   }
 
+  public func put(
+    _ pathMatcher: PathMatching,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.PUT, with: pathMatcher, and: handler)
+    )
+  }
+
+  // MARK: Patch
   public func patch(
     _ pathLiteral: String = "",
     handler: @escaping HTTPHandler
@@ -113,6 +144,16 @@ extension Router {
     )
   }
 
+  public func patch(
+    _ pathMatcher: PathMatching,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.PATCH, with: pathMatcher, and: handler)
+    )
+  }
+
+  // MARK: Delete
   public func delete(
     _ pathLiteral: String = "",
     handler: @escaping HTTPHandler
@@ -131,6 +172,16 @@ extension Router {
     )
   }
 
+  public func delete(
+    _ pathMatcher: PathMatching,
+    handler: @escaping HTTPHandler
+  ) {
+    use(
+      generate(.DELETE, with: pathMatcher, and: handler)
+    )
+  }
+
+  // MARK: Private Members
   private func generate(
     _ method: HTTPMethod = .GET,
     with pathLiteral: String = "",
@@ -149,7 +200,7 @@ extension Router {
 
   private func generate(
     _ method: HTTPMethod = .GET,
-    with builder: PathBuilder,
+    with builder: PathMatching,
     and handler: @escaping HTTPHandler
   ) -> Middleware {
     { request, response, nextHandler in
@@ -165,7 +216,6 @@ extension Router {
       }
     }
   }
-
 }
 
 extension Router {
