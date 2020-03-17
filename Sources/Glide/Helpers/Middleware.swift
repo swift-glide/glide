@@ -1,7 +1,5 @@
 import Foundation
 
-let requestParameterKey = "com.redalemeden.glide.parameter"
-
 public typealias Handler = () -> Void
 public typealias HTTPHandler = (Request, Response) throws -> Void
 public typealias ErrorHandler = ([Error], Request, Response) -> Void
@@ -27,16 +25,22 @@ public func finalize(_ perform: @escaping HTTPHandler) -> Middleware {
 
 // MARK: - Built-in Middleware
 
-public let parameterParser = {
-  passthrough { request, response in
-    guard let queryItems = URLComponents(string: request.header.uri)?.queryItems else { return }
+let parameterParsingHandler: HTTPHandler = { request, _ in
+  guard let components = URLComponents(string: request.header.uri),
+    let queryItems = components.queryItems else { return }
 
-    request.userInfo[requestParameterKey] = Dictionary(grouping: queryItems, by: { $0.name })
-      .mapValues {
-        $0.compactMap({ $0.value })
-          .joined(separator: ",")
-      }
-  }
+  request.queryParameters = Parameters(storage: Dictionary(
+    grouping: queryItems,
+    by: { $0.name }
+  ).mapValues {
+    $0.compactMap({ $0.value })
+      .joined(separator: ",")
+    }
+  )
+}
+
+public let parameterParser = {
+  passthrough(parameterParsingHandler)
 }()
 
 public let consoleLogger = {
