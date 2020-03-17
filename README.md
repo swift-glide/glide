@@ -73,7 +73,8 @@ curl http://localhost:1337/hello
 
 ## Roadmap
 
-- Add error middleware.
+- ~Add error middleware.~
+- ~Add support for typed request parameters.~
 - Add support for templating packages.
 - Add support for sessions & cookies.
 - Add support for static file.
@@ -81,4 +82,3 @@ curl http://localhost:1337/hello
 - Add support for redirects.
 - Add support for state storage.
 - Add support for Web forms.
-- Add support for type-safe request parameters.
