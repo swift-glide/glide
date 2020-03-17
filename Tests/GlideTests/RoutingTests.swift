@@ -160,8 +160,8 @@ final class RoutingTests: GlideTests {
     wait(for: [expectation], timeout: 5)
   }
 
-  func testCustomerMatcher() throws {
-    struct MyCustomerMatcher: PathMatching {
+  func testCustomPathMatching() throws {
+    struct MyCustomMatcher: PathMatching {
       func match(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
         return (true, Parameters())
       }
@@ -170,7 +170,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(MyCustomerMatcher()) { request, response in
+      app.get(MyCustomMatcher()) { request, response in
         response.send("Matching successful")
         expectation.fulfill()
       }
