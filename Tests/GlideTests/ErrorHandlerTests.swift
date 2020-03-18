@@ -33,7 +33,6 @@ final class ErrorHandlerTests: GlideTests {
   }
 
   func testCustomErrorHandler() throws {
-    let path = "/throw"
     var caughtError: CustomError? = nil
     let expectation = XCTestExpectation()
 
@@ -43,7 +42,7 @@ final class ErrorHandlerTests: GlideTests {
     }
 
     performHTTPTest { app, client in
-      app.get(path) { _, _ in
+      app.get("/throw") { _, _ in
         throw CustomError.someError
       }
 
@@ -52,7 +51,7 @@ final class ErrorHandlerTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)\(path)",
+        url: "http://localhost:\(testPort)/throw",
         method: .GET,
         headers: .init()
       )
@@ -66,7 +65,6 @@ final class ErrorHandlerTests: GlideTests {
   }
 
   func testAbortError() throws {
-    let path = "/abort"
     let expectation = XCTestExpectation()
 
     enum CustomAbortError: AbortError {
@@ -83,7 +81,7 @@ final class ErrorHandlerTests: GlideTests {
     }
 
     performHTTPTest { app, client in
-      app.get(path) { _, _ in
+      app.get("/abort") { _, _ in
         throw CustomAbortError.someError
       }
 
@@ -92,7 +90,7 @@ final class ErrorHandlerTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)\(path)",
+        url: "http://localhost:\(testPort)/abort",
         method: .GET,
         headers: .init()
       )

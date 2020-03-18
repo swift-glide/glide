@@ -3,8 +3,9 @@ import Glide
 import NIOHTTP1
 
 struct User: Codable {
-  var name: String
-  var password: String
+  var id: Int
+  var name: String = "user"
+  var password: String = "password"
 }
 
 enum CustomError: Error {
@@ -60,8 +61,16 @@ app.get("/abort") { _, _ in
   throw CustomAbortError.badCredentials
 }
 
-app.get("hello", .string("name")) { request, response in
+app.get("/hello/\(string: "name")") { request, response in
   response.send("Hello, \(request.pathParameters.name ?? "world")!")
+}
+
+app.get("/users/\(int: "id")") { request, response in
+  func find(_ id: Int) -> User {
+    User(id: id)
+  }
+
+  response.json(find(request.pathParameters.id ?? 0))
 }
 
 app.post("/post") { request, response in
@@ -75,7 +84,6 @@ app.post("/post") { request, response in
   } catch let error as DecodingError {
     throw error
   }
-
 }
 
 app.listen(1337)

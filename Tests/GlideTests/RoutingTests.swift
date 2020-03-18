@@ -6,29 +6,11 @@ import XCTest
 @testable import Glide
 
 final class RoutingTests: GlideTests {
-  func testPathBuilder() throws {
-    let literal = "/hello/{foo}/{bar:string}/baz/{qux:int}/"
-    let segments = pathSegmentParser.run(literal).match ?? []
-    XCTAssertFalse(segments.isEmpty)
-    XCTAssertEqual(segments[0], .constant("hello"))
-    XCTAssertEqual(segments[1], .string("foo"))
-    XCTAssertEqual(segments[2], .string("bar"))
-    XCTAssertEqual(segments[4], .int("qux"))
-  }
-
-  func testPathBuilderWildcards() throws {
-    let literal = "/hello/{*}/bar/{*}/baz"
-    let segments = pathSegmentParser.run(literal).match ?? []
-    XCTAssertFalse(segments.isEmpty)
-    XCTAssertEqual(segments[1], .wildcard)
-    XCTAssertEqual(segments[3], .wildcard)
-  }
-
   func testPathMatching() throws {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello", .string("foo"), .int("bar")) { request, response in
+      app.get("hello/\(string: "foo")/\(int: "bar")") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -49,11 +31,10 @@ final class RoutingTests: GlideTests {
   }
 
   func testPathLiteralMatching() throws {
-    let path = "/hello/{foo}/{bar:string}/baz/{qux:int}/"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/hello/\(string: "foo")/\(string: "bar")/baz/\(int: "qux")/") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -112,11 +93,10 @@ final class RoutingTests: GlideTests {
   }
 
   func testPathLiteralWildcard() throws {
-    let path = "/hello/{*}/bar/{*}/baz"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/hello/\(wildcard: .segment)/bar/\(wildcard: .segment)/baz") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.wildcards.count, 2)
         XCTAssertEqual(request.pathParameters.wildcards[0], "foo")
@@ -141,7 +121,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello", .string("param"), .matchAll, .string("never")) { request, response in
+      app.get("hello/\(string: "param")/\(wildcard: .allTrailing)/\(string: "never")") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.param, "foo")
         XCTAssertNil(request.pathParameters["never"]?.asString())
@@ -161,8 +141,8 @@ final class RoutingTests: GlideTests {
   }
 
   func testCustomPathMatching() throws {
-    struct MyCustomMatcher: PathMatching {
-      func match(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
+    struct MyCustomParser: PathParsing {
+      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
         return (true, Parameters())
       }
     }
@@ -170,7 +150,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(MyCustomMatcher()) { request, response in
+      app.get(MyCustomParser()) { request, response in
         response.send("Matching successful")
         expectation.fulfill()
       }

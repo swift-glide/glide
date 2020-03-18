@@ -7,11 +7,10 @@ import XCTest
 
 final class ParameterTests: GlideTests {
   func testQueryParameterString() throws {
-    let path = "/query"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/query") { request, response in
         response.send(request.queryParameters.foo ?? "")
 
         XCTAssertEqual(request.queryParameters["foo"]?.asString(), "bar")
@@ -20,7 +19,7 @@ final class ParameterTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)\(path)?foo=bar&baz=qux",
+        url: "http://localhost:\(testPort)/query?foo=bar&baz=qux",
         method: .GET,
         headers: .init()
       )
@@ -32,11 +31,10 @@ final class ParameterTests: GlideTests {
   }
 
   func testQueryParameterNumeric() throws {
-    let path = "/query"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/query") { request, response in
         response.send(request.queryParameters.foo ?? "")
 
         XCTAssertEqual(request.queryParameters["foo"]?.asInt(), 12)
@@ -54,7 +52,7 @@ final class ParameterTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)\(path)?foo=12&bar=10.9&baz=10.0&qux",
+        url: "http://localhost:\(testPort)/query?foo=12&bar=10.9&baz=10.0&qux",
         method: .GET,
         headers: .init()
       )
@@ -66,11 +64,10 @@ final class ParameterTests: GlideTests {
   }
 
   func testQueryParameterBool() throws {
-    let path = "/query"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/query") { request, response in
         response.send(request.queryParameters.foo ?? "")
 
         XCTAssertEqual(request.queryParameters["foo"]?.asBool(), true)
@@ -85,7 +82,7 @@ final class ParameterTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)\(path)?foo=true&bar=0&baz=false",
+        url: "http://localhost:\(testPort)/query?foo=true&bar=0&baz=false",
         method: .GET,
         headers: .init()
       )
