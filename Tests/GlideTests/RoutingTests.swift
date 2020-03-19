@@ -6,29 +6,11 @@ import XCTest
 @testable import Glide
 
 final class RoutingTests: GlideTests {
-  func testPathBuilder() throws {
-    let literal = "/hello/{foo}/{bar:string}/baz/{qux:int}/"
-    let segments = pathSegmentParser.run(literal).match ?? []
-    XCTAssertFalse(segments.isEmpty)
-    XCTAssertEqual(segments[0], .constant("hello"))
-    XCTAssertEqual(segments[1], .string("foo"))
-    XCTAssertEqual(segments[2], .string("bar"))
-    XCTAssertEqual(segments[4], .int("qux"))
-  }
-
-  func testPathBuilderWildcards() throws {
-    let literal = "/hello/{*}/bar/{*}/baz"
-    let segments = pathSegmentParser.run(literal).match ?? []
-    XCTAssertFalse(segments.isEmpty)
-    XCTAssertEqual(segments[1], .wildcard)
-    XCTAssertEqual(segments[3], .wildcard)
-  }
-
   func testPathMatching() throws {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello", .string("foo"), .int("bar")) { request, response in
+      app.get("hello/\("foo")/\("bar", as: Int.self)") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -49,11 +31,10 @@ final class RoutingTests: GlideTests {
   }
 
   func testPathLiteralMatching() throws {
-    let path = "/hello/{foo}/{bar:string}/baz/{qux:int}/"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/hello/\("foo")/\("bar")/baz/\("qux", as: Int.self)/") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -63,10 +44,10 @@ final class RoutingTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)/hello/test/glide/baz/58",
+        url: "http://localhost:\(testPort)/hello/test/glide/baz/58/",
         method: .GET,
         headers: .init()
-      )
+      ) 
 
       _ = try client.execute(request: request).wait()
     }
@@ -112,11 +93,10 @@ final class RoutingTests: GlideTests {
   }
 
   func testPathLiteralWildcard() throws {
-    let path = "/hello/{*}/bar/{*}/baz"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/hello/\(wildcard: .one)/bar/\(wildcard: .one)/baz") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.wildcards.count, 2)
         XCTAssertEqual(request.pathParameters.wildcards[0], "foo")
@@ -141,15 +121,17 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello", .string("param"), .matchAll, .string("never")) { request, response in
+      app.get("hello/\("param")/\(wildcard: .all)/\("never")") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.param, "foo")
         XCTAssertNil(request.pathParameters["never"]?.asString())
+        XCTAssertTrue(request.pathParameters.wildcards.contains("baz"))
+        XCTAssertEqual(request.pathParameters.wildcards, ["bar", "baz", "qux"])
         expectation.fulfill()
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)/hello/foo/bar/baz",
+        url: "http://localhost:\(testPort)/hello/foo/bar/baz/qux",
         method: .GET,
         headers: .init()
       )
@@ -161,8 +143,8 @@ final class RoutingTests: GlideTests {
   }
 
   func testCustomPathMatching() throws {
-    struct MyCustomMatcher: PathMatching {
-      func match(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
+    struct MyCustomParser: PathParsing {
+      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters?) {
         return (true, Parameters())
       }
     }
@@ -170,7 +152,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(MyCustomMatcher()) { request, response in
+      app.get(MyCustomParser()) { request, response in
         response.send("Matching successful")
         expectation.fulfill()
       }

@@ -42,174 +42,88 @@ extension Router {
 // MARK: - HTTP Methods
 extension Router {
   // MARK: Get
-  public func get(
-    _ pathLiteral: String = "",
-    handler: @escaping HTTPHandler
-  ) {
+  public func get<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(with: pathLiteral, and: handler)
+      generate(with: pathParser, and: handler)
     )
   }
 
-  public func get(
-    _ segments: PathSegmentDescriptor...,
-    handler: @escaping HTTPHandler
-  ) {
+  public func get(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(with: segments, and: handler)
+      generate(with: expression, and: handler)
     )
   }
 
-  public func get(
-    _ pathMatcher: PathMatching,
-    handler: @escaping HTTPHandler
-  ) {
-    use(
-      generate(with: pathMatcher, and: handler)
-    )
-  }
 
   // MARK: Post
-  public func post(
-    _ pathLiteral: String = "",
-    handler: @escaping HTTPHandler
-  ) {
+  public func post<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.POST, with: pathLiteral, and: handler)
+      generate(.POST, with: pathParser, and: handler)
     )
   }
 
-  public func post(
-    _ segments: PathSegmentDescriptor...,
-    handler: @escaping HTTPHandler
-  ) {
+  public func post(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.POST, with: segments, and: handler)
-    )
-  }
-
-  public func post(
-    _ pathMatcher: PathMatching,
-    handler: @escaping HTTPHandler
-  ) {
-    use(
-      generate(.POST, with: pathMatcher, and: handler)
+      generate(.POST, with: expression, and: handler)
     )
   }
 
   // MARK: Put
-  public func put(
-    _ pathLiteral: String = "",
-    handler: @escaping HTTPHandler
-  ) {
+  public func put<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.PUT, with: pathLiteral, and: handler)
+      generate(.PUT, with: pathParser, and: handler)
     )
   }
 
-  public func put(
-    _ segments: PathSegmentDescriptor...,
-    handler: @escaping HTTPHandler
-  ) {
+  public func put(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.PUT, with: segments, and: handler)
+      generate(.PUT, with: expression, and: handler)
     )
   }
 
-  public func put(
-    _ pathMatcher: PathMatching,
-    handler: @escaping HTTPHandler
-  ) {
-    use(
-      generate(.PUT, with: pathMatcher, and: handler)
-    )
-  }
 
   // MARK: Patch
-  public func patch(
-    _ pathLiteral: String = "",
-    handler: @escaping HTTPHandler
-  ) {
+  public func patch<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.PATCH, with: pathLiteral, and: handler)
+      generate(.PATCH, with: pathParser, and: handler)
     )
   }
 
-  public func patch(
-    _ segments: PathSegmentDescriptor...,
-    handler: @escaping HTTPHandler
-  ) {
+  public func patch(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.PATCH, with: segments, and: handler)
+      generate(.PATCH, with: expression, and: handler)
     )
   }
 
-  public func patch(
-    _ pathMatcher: PathMatching,
-    handler: @escaping HTTPHandler
-  ) {
-    use(
-      generate(.PATCH, with: pathMatcher, and: handler)
-    )
-  }
 
   // MARK: Delete
-  public func delete(
-    _ pathLiteral: String = "",
-    handler: @escaping HTTPHandler
-  ) {
+  public func delete<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.DELETE, with: pathLiteral, and: handler)
+      generate(.DELETE, with: pathParser, and: handler)
     )
   }
 
-  public func delete(
-    _ segments: PathSegmentDescriptor...,
-    handler: @escaping HTTPHandler
-  ) {
+
+  public func delete(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.DELETE, with: segments, and: handler)
+      generate(.DELETE, with: expression, and: handler)
     )
   }
 
-  public func delete(
-    _ pathMatcher: PathMatching,
-    handler: @escaping HTTPHandler
-  ) {
-    use(
-      generate(.DELETE, with: pathMatcher, and: handler)
-    )
-  }
 
   // MARK: Private Members
-  private func generate(
+  private func generate<T>(
     _ method: HTTPMethod = .GET,
-    with pathLiteral: String = "",
+    with builder: T,
     and handler: @escaping HTTPHandler
-  ) -> Middleware {
-    generate(method, with: PathBuilder(segments: pathSegmentParser.run(pathLiteral).match ?? []), and: handler)
-  }
-
-  private func generate(
-    _ method: HTTPMethod = .GET,
-    with segments: [PathSegmentDescriptor],
-    and handler: @escaping HTTPHandler
-  ) -> Middleware {
-    generate(method, with: PathBuilder(segments: segments), and: handler)
-  }
-
-  private func generate(
-    _ method: HTTPMethod = .GET,
-    with builder: PathMatching,
-    and handler: @escaping HTTPHandler
-  ) -> Middleware {
+  ) -> Middleware  where T: PathParsing {
     { request, response, nextHandler in
       guard request.header.method == method else { return nextHandler() }
 
-      let (isMatching, parameters) = builder.match(request.header.uri)
+      let (isMatching, parameters) = builder.parse(request.header.uri)
 
-      if isMatching {
-        request.pathParameters = parameters
+      if isMatching, let params = parameters {
+        request.pathParameters = params
         try finalize(handler)(request, response, nextHandler)
       } else {
         return nextHandler()

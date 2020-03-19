@@ -31,16 +31,15 @@ class GlideTests: XCTestCase {
 
 class AppTests: GlideTests {  
   func testPing() throws {
-    let path = "/ping"
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get(path) { request, response in
+      app.get("/ping") { request, response in
         response.send("pong")
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)\(path)",
+        url: "http://localhost:\(testPort)/ping",
         method: .GET,
         headers: .init()
       )
