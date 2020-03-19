@@ -30,7 +30,7 @@ public extension PathExpression {
     case literal(_ value: String)
     case int(_ identifier: String)
     case string(_ identifier: String)
-    case wildcard(_ type: WildcardScope = .segment)
+    case wildcard(_ scope: WildcardScope = .segment)
 
     init?<T>(_ raw: T) where T: StringProtocol {
       let segment = String(raw)
