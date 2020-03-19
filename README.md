@@ -74,10 +74,10 @@ curl http://localhost:1337/hello
 ## Roadmap
 
 - ~Add error middleware.~
-- ~Add support for typed request parameters.~
+- ~Add support for path and query parameters.~
 - Add support for templating packages.
 - Add support for sessions & cookies.
-- Add support for static file.
+- Add support for static files.
 - Add support for uploads.
 - Add support for redirects.
 - Add support for state storage.
