@@ -47,12 +47,13 @@ final class ParameterTests: GlideTests {
         XCTAssertEqual(request.queryParameters.baz, Float(10))
 
         XCTAssertNotNil(request.queryParameters["qux"])
+        XCTAssertEqual(request.queryParameters.thud, true)
 
         expectation.fulfill()
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)/query?foo=12&bar=10.9&baz=10.0&qux",
+        url: "http://localhost:\(testPort)/query?foo=12&bar=10.9&baz=10.0&qux&thud=true",
         method: .GET,
         headers: .init()
       )

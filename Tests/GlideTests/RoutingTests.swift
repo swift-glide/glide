@@ -10,7 +10,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello/\(string: "foo")/\(int: "bar")") { request, response in
+      app.get("hello/\(as: "foo")/\(as: "bar", type: Int.self)") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -34,7 +34,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("/hello/\(string: "foo")/\(string: "bar")/baz/\(int: "qux")/") { request, response in
+      app.get("/hello/\(as: "foo")/\(as: "bar")/baz/\(as: "qux", type: Int.self)/") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -44,10 +44,10 @@ final class RoutingTests: GlideTests {
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)/hello/test/glide/baz/58",
+        url: "http://localhost:\(testPort)/hello/test/glide/baz/58/",
         method: .GET,
         headers: .init()
-      )
+      ) 
 
       _ = try client.execute(request: request).wait()
     }
@@ -96,7 +96,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("/hello/\(wildcard: .segment)/bar/\(wildcard: .segment)/baz") { request, response in
+      app.get("/hello/\(wildcard: .one)/bar/\(wildcard: .one)/baz") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.wildcards.count, 2)
         XCTAssertEqual(request.pathParameters.wildcards[0], "foo")
@@ -121,7 +121,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello/\(string: "param")/\(wildcard: .allTrailing)/\(string: "never")") { request, response in
+      app.get("hello/\(as: "param")/\(wildcard: .all)/\(as: "never")") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.param, "foo")
         XCTAssertNil(request.pathParameters["never"]?.asString())

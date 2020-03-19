@@ -61,11 +61,11 @@ app.get("/abort") { _, _ in
   throw CustomAbortError.badCredentials
 }
 
-app.get("/hello/\(string: "name")") { request, response in
+app.get("/hello/\(as: "name")") { request, response in
   response.send("Hello, \(request.pathParameters.name ?? "world")!")
 }
 
-app.get("/users/\(int: "id")") { request, response in
+app.get("/users/\(as: "id", type: Int.self)") { request, response in
   func find(_ id: Int) -> User {
     User(id: id)
   }

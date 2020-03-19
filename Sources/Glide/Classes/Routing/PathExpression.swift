@@ -11,33 +11,46 @@ public struct PathExpression {
   var segments = [Segment]()
 }
 
+
+public func == (lhs: PathExpression.Segment, rhs: PathExpression.Segment) -> Bool {
+  switch (lhs, rhs) {
+  case let (.literal(lhsValue), .literal(rhsValue)):
+    return lhsValue == rhsValue
+  case let (.wildcard(lhsValue), .wildcard(rhsValue)):
+    return lhsValue == rhsValue
+  case let (.parameter(lhsID, lhsType), .parameter(rhsID, rhsType)):
+    return lhsID == rhsID && lhsType == rhsType
+  default:
+    return false
+  }
+}
+
 public extension PathExpression {
   enum WildcardScope: CustomStringConvertible {
-    case segment
-    case allTrailing
+    case one
+    case all
 
     public var description: String {
       switch self {
-      case .segment:
+      case .one:
         return "*"
-      case .allTrailing:
+      case .all:
         return "**"
       }
     }
   }
 
-  enum Segment: Equatable, CustomStringConvertible {
+  enum Segment: CustomStringConvertible, Equatable {
     case literal(_ value: String)
-    case int(_ identifier: String)
-    case string(_ identifier: String)
-    case wildcard(_ scope: WildcardScope = .segment)
+    case parameter(_ identifier: String, type: ParameterRepresentable.Type = String.self)
+    case wildcard(_ scope: WildcardScope = .one)
 
     init?<T>(_ raw: T) where T: StringProtocol {
       let segment = String(raw)
 
       if segment.starts(with: ":") {
         let name = segment.dropFirst()
-        self = .string(String(name))
+        self = .parameter(String(name))
       } else if !segment.isEmpty {
         self = .literal(String(segment))
       } else {
@@ -49,9 +62,7 @@ public extension PathExpression {
       switch self {
       case .literal(let value):
         return value
-      case .string(let identifier):
-        return ":\(identifier)"
-      case .int(let identifier):
+      case .parameter(let identifier, _):
         return ":\(identifier)"
       case .wildcard(let scope):
         return scope.description
@@ -89,17 +100,17 @@ extension PathExpression: ExpressibleByStringInterpolation {
       segments.append(contentsOf: parseSegments(stringLiteral))
     }
 
-    mutating public func appendInterpolation(string identifier: String) {
-      segments.append(.string(identifier))
-    }
-
-    mutating public func appendInterpolation(int identifier: String) {
-      segments.append(.int(identifier))
-    }
-
     mutating public func appendInterpolation(wildcard scope: WildcardScope) {
       segments.append(.wildcard(scope))
     }
+
+    mutating public func appendInterpolation<T: ParameterRepresentable>(as name: String, type: T.Type) {
+        segments.append(.parameter(name, type: type))
+      }
+
+    mutating public func appendInterpolation(as name: String) {
+      segments.append(.parameter(name, type: String.self))
+      }
   }
 
   public init(stringInterpolation: StringInterpolation) {
@@ -126,17 +137,17 @@ extension PathExpression: PathParsing {
         if value != match.1 {
           return (false, parameters)
         }
-      case .int(let name):
-        if let value = Int(match.1) {
+      case .parameter(let name, let type):
+        if type == String.self {
+          parameters[name] = match.1
+        } else if let value = type.init(String(match.1)) {
           parameters[name] = value
         } else {
           return (false, parameters)
         }
-      case .string(let name):
-        parameters[name] = match.1
       case .wildcard(let scope):
         switch scope {
-        case .segment:
+        case .one:
           parameters.wildcards.append(match.1)
         default:
           return (true, parameters)
