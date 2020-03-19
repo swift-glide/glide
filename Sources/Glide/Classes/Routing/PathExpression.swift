@@ -3,7 +3,7 @@ import Foundation
 public protocol PathParsing {
   func parse(_ url: String) -> (
     isMatching: Bool,
-    parameters: Parameters
+    parameters: Parameters?
   )
 }
 
@@ -122,35 +122,46 @@ extension PathExpression: ExpressibleByStringInterpolation {
 extension PathExpression: PathParsing {
   public func parse(_ url: String) -> (
     isMatching: Bool,
-    parameters: Parameters
-    ) {
-    var parameters = Parameters()
+    parameters: Parameters?
+  ) {
 
     guard let urlComponents = URLComponents(string: url) else {
-      return (false, parameters)
+      return (false, nil)
     }
 
-    let matches = zip(segments, urlComponents.segments)
+    var parameters = Parameters()
+    let segmentPairs = zip(segments, urlComponents.segments)
+    var wildcards: [Substring?] = urlComponents.segments
 
-    for match in matches {
-      switch match.0 {
+    for (index, pair) in segmentPairs.enumerated() {
+      switch pair.0 {
       case .literal(let value):
-        if value != match.1 {
-          return (false, parameters)
+        wildcards[index] = nil
+
+        if value != pair.1 {
+          return (false, nil)
         }
-      case .parameter(let name, let type):
-        if type == String.self {
-          parameters[name] = match.1
-        } else if let value = type.init(String(match.1)) {
-          parameters[name] = value
-        } else {
-          return (false, parameters)
+
+      case let .parameter(name, type) where type == String.self:
+        parameters[name] = pair.1
+        wildcards[index] = nil
+
+      case let .parameter(name, type):
+        guard let value = type.init(String(pair.1)) else {
+          return (false, nil)
         }
+
+        parameters[name] = value
+        wildcards[index] = nil
+
       case .wildcard(let scope):
         switch scope {
         case .one:
-          parameters.wildcards.append(match.1)
-        default:
+          parameters.wildcards.append(pair.1)
+          wildcards[index] = nil
+
+        case .all:
+          parameters.wildcards.append(contentsOf: wildcards.compactMap { $0 })
           return (true, parameters)
         }
       }

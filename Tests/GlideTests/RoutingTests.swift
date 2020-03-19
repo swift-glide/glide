@@ -125,11 +125,13 @@ final class RoutingTests: GlideTests {
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.param, "foo")
         XCTAssertNil(request.pathParameters["never"]?.asString())
+        XCTAssertTrue(request.pathParameters.wildcards.contains("baz"))
+        XCTAssertEqual(request.pathParameters.wildcards, ["bar", "baz", "qux"])
         expectation.fulfill()
       }
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)/hello/foo/bar/baz",
+        url: "http://localhost:\(testPort)/hello/foo/bar/baz/qux",
         method: .GET,
         headers: .init()
       )
@@ -142,7 +144,7 @@ final class RoutingTests: GlideTests {
 
   func testCustomPathMatching() throws {
     struct MyCustomParser: PathParsing {
-      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
+      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters?) {
         return (true, Parameters())
       }
     }

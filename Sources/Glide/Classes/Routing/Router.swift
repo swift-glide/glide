@@ -122,8 +122,8 @@ extension Router {
 
       let (isMatching, parameters) = builder.parse(request.header.uri)
 
-      if isMatching {
-        request.pathParameters = parameters
+      if isMatching, let params = parameters {
+        request.pathParameters = params
         try finalize(handler)(request, response, nextHandler)
       } else {
         return nextHandler()
