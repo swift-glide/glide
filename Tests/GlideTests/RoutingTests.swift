@@ -10,7 +10,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello/\(as: "foo")/\(as: "bar", type: Int.self)") { request, response in
+      app.get("hello/\("foo")/\("bar", as: Int.self)") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -34,7 +34,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("/hello/\(as: "foo")/\(as: "bar")/baz/\(as: "qux", type: Int.self)/") { request, response in
+      app.get("/hello/\("foo")/\("bar")/baz/\("qux", as: Int.self)/") { request, response in
         response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
@@ -121,7 +121,7 @@ final class RoutingTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("hello/\(as: "param")/\(wildcard: .all)/\(as: "never")") { request, response in
+      app.get("hello/\("param")/\(wildcard: .all)/\("never")") { request, response in
         response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.param, "foo")
         XCTAssertNil(request.pathParameters["never"]?.asString())
