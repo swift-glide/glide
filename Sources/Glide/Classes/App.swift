@@ -9,11 +9,20 @@ public enum Environment: Equatable {
   case custom(String)
 }
 
-public final class Glide: Router {
-  let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-  var serverChannel: Channel?
+public final class Application: Router {
   public private(set) var didShutdown: Bool
   public private(set) var environment: Environment
+
+  let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+  var serverChannel: Channel?
+
+  let threadPool = { () -> NIOThreadPool in
+    let threadPool = NIOThreadPool(numberOfThreads: NonBlockingFileIO.defaultThreadPoolSize)
+    threadPool.start()
+    return threadPool
+  }()
+
+  var allocator: ByteBufferAllocator = .init()
 
   public init(_ environment: Environment = .development) {
     self.didShutdown = false
@@ -77,7 +86,7 @@ public final class Glide: Router {
       .serverChannelOption(localAddressReuseOption, value: 1)
       .childChannelInitializer { channel in
         channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-          channel.pipeline.addHandler(HTTPServerHandler(router: self))
+          channel.pipeline.addHandler(HTTPServerHandler(application: self, router: self))
         }
       }
       .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
@@ -105,5 +114,11 @@ public final class Glide: Router {
     if !self.didShutdown {
       assertionFailure("Server shut down before the app was deinitialized.")
     }
+  }
+}
+
+extension Application {
+  public var fileIO: NonBlockingFileIO {
+    .init(threadPool: self.threadPool)
   }
 }

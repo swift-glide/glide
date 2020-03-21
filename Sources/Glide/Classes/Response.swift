@@ -81,6 +81,19 @@ public extension Response {
 }
 
 public extension Response {
+  func file(at path: String, for request: Request) throws {
+    try request.fileIO.readEntireFile(at: path)
+      .whenSuccess { buffer in
+        self.flushHeader()
+
+        let bodypart = HTTPServerResponsePart.body(.byteBuffer(buffer))
+
+        self.channel.writeAndFlush(bodypart)
+          .recover(self.handleError)
+          .whenSuccess(self.end)
+    }
+  }
+
   func json<T: Encodable>(_ model: T) {
     let data : Data
 

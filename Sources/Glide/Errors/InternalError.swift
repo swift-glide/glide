@@ -3,10 +3,16 @@ import NIOHTTP1
 
 enum InternalError: LocalizedError, CustomStringConvertible {
   case unhandledRoute
+  case assetNotFound
+  case unknown
 
   var status: HTTPResponseStatus {
     switch self {
     case .unhandledRoute:
+      return .notFound
+    case .unknown:
+      return .internalServerError
+    case .assetNotFound:
       return .notFound
     }
   }
@@ -23,6 +29,10 @@ enum InternalError: LocalizedError, CustomStringConvertible {
     switch self {
     case .unhandledRoute:
       return "No middleware found to handle this route."
+    case .assetNotFound:
+      return "Static asset not found."
+    case .unknown:
+      return "An internal server error has occured."
     }
   }
 }

@@ -104,6 +104,10 @@ extension PathExpression: ExpressibleByStringInterpolation {
       segments.append(.wildcard(scope))
     }
 
+    mutating public func appendInterpolation(literal value: String) {
+      segments.append(.literal(value))
+    }
+
     mutating public func appendInterpolation<T>(_ name: String, as type: T.Type)
       where T: ParameterRepresentable {
         segments.append(.parameter(name, type: type))
