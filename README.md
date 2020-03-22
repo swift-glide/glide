@@ -44,7 +44,7 @@ let app = Application()
 
 // 3. Add a route.
 app.get("/hello") { _, response in
-  response.send("Hello, 2020!")
+  response.send("Hello, world!")
 }
 
 // 4. Start listening on a given port
@@ -69,16 +69,16 @@ Once the project is running either via Xcode or the Swift CLI, run the following
 
 ```shell
 curl "http://localhost:1337/hello"
-# -> "Hello, 2020!"
+# -> "Hello, world!"
 ```
 
 ### Middleware
 
 Glide uses a highly flexible middleware architecture. Each request will go through a chain of middleware functions matching its route and triggering side-effects such as reading from a database or fetching data from a remote server.
 
-A middleware function receives a request, a response, and a closure. It can modify both the request and the response. It can also decide to to call the next closure to handover the request/response pair to the next middleware in the chain. It opts out of calling `next()`, it needs to finalize the response and send it back using one of the provided methods.
+A middleware function receives a request, a response, and a closure. It can modify both the request and the response. It can also decide to to call the closure to handover the request/response pair to the next middleware in the chain. If it opts out of calling `next()`, it needs to finalize the response and send it back using one of the provided methods.
 
-Whn an error occures in the bidy o fthe middleware function, it can be thrown and left for other error handlers to catch. More on error handling later.
+When an error occurs in the body of the middleware function, it can be thrown and left for other error handlers to catch. More on error handling later.
 
 The middleware signature is the following:
 
@@ -103,7 +103,7 @@ _ next: @escaping () -> Void
 }
 ```
 
-To register the middleware, call the `use()` method on `Application` when configurring your app:
+To register the middleware, call the `use()` method on `Application` when configuring your app:
 
 ```swift
 let app = Application()
@@ -116,23 +116,23 @@ For convenience, Glide introduces a number of middleware generators that handle 
 
 Routing is the process of matching the path of a request to a specific middleware. Since it's a common operation, Glide provides dedicated middleware generators such as `get()`, `post()`, `patch()`, etc.
 
-For example, if you want your app to return a list of todos when the user visist the `/todos` page, you can add a middleware like so:
+For example, if you want your app to return a list of todos when the user visits the `/todos` URL, you can do the following:
 
 ```swift
 app.get("/todos") { request, response in
-  let todos = ... // Get a list of todos from a database, a file, a remote server, etc.
+  let todos = ... // Get a list of todos from a database, file, remote server, etc.
   
   response.json(todos)
 }
 ```
 
-Notice how the `get()`  middleware generator makes the next handler an implementation detail, letting you focus on the request and response instead. This also means that you have to finalize the response and send it back, int his case as a JOSN response using the `response.json()` helper.
+Notice how the `get()`  middleware generator doesn't require you to worry about the next handler closure. This also implies that you have to finalize the response and send it back, in this case as a JOSN response using the `response.json()` helper.
 
 #### Parameters & Queries
 
 In the real world,  requests will likely have a path or query parameter in them. To tackle that, Glide uses custom string interpolation to create path expressions used for route matching. 
 
-To illustrate, let's say that we want to return a specific todo to the end-user. We know that the `id` property of the todo is an `Int`. Here's how we can handle that:
+To illustrate, let's say that we want to return a specific todo to the end user. We know that the `id` property of the todo is an `Int`. Here's how we can handle that:
 
 ```swift
 app.get("/todos/\("id", as: Int.self)") { request, response in
@@ -169,7 +169,7 @@ PS: Path and query parameters might change in the future based on usage feedback
 
 #### Wildcards
 
-Sometimes a route has to match any request path, storing unnnamed path components for later perusal. In those case, the `wildcard` custom interploiation in `PathExpression` comes in handy:
+Sometimes a route has to match any request path, storing nameless path components for later perusal. For those cases, the `wildcard` custom interpolation in `PathExpression` comes in handy:
 
 ```swift
 app.get(/todos/\(wildcard: .all))
@@ -180,7 +180,7 @@ app.get(/todos/\(wildcard: .all))
 */
 ```
 
-The path components after the wildcard are collected in the order they appear as strings in the `request.pathParameters.wildcards` array. Similary, `\(wildcard: .one)` can be used to mark only one path of the segment as an unnamed path parameter.
+The path components after the wildcard are collected in the order they appear as strings in the `request.pathParameters.wildcards` array. Similary, `\(wildcard: .one)` can be used to mark only one path of the segment as an nameless path parameter.
 
 ### Error Handling
 
