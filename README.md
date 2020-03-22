@@ -43,7 +43,7 @@ import Glide
 let app = Application()
 
 // 3. Add a route.
-app.get("/hello") { _, response, _ in
+app.get("/hello") { _, response in
   response.send("Hello, 2020!")
 }
 
