@@ -72,7 +72,10 @@ public func staticFileHandler(_ directory: String = "/static") -> Middleware {
   var assetPath = workingDirectory + "/" + assetDirName
   assetPath = assetPath.hasSuffix("/") ? String(assetPath.dropFirst()) : assetPath
 
+  print("Serving static files from: \(assetPath)")
+
   let path: PathExpression = "\(literal: assetDirName)/\(wildcard: .all)"
+
   return Router.generate(.GET, with: path) { request, response in
     let filePath = request.pathParameters.wildcards.joined(separator: "/")
     try response.file(at: "\(assetPath)/\(filePath)", for: request)
