@@ -38,15 +38,16 @@ enum CustomAbortError: AbortError {
   }
 }
 
-let app = Glide()
+let app = Application()
 
 app.use(
   consoleLogger,
-  corsHandler(allowOrigin: "*")
+  corsHandler(allowOrigin: "*"),
+  staticFileHandler()
 )
 
 app.use(errorLogger, { errors, _, _ in
-  print(errors.count)
+  print(errors.count, "error(s) encountered.")
 })
 
 app.use { _, _, _ in

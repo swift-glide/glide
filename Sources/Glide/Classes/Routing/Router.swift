@@ -44,13 +44,13 @@ extension Router {
   // MARK: Get
   public func get<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(with: pathParser, and: handler)
+      Router.generate(with: pathParser, and: handler)
     )
   }
 
   public func get(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(with: expression, and: handler)
+      Router.generate(with: expression, and: handler)
     )
   }
 
@@ -58,26 +58,26 @@ extension Router {
   // MARK: Post
   public func post<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.POST, with: pathParser, and: handler)
+      Router.generate(.POST, with: pathParser, and: handler)
     )
   }
 
   public func post(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.POST, with: expression, and: handler)
+      Router.generate(.POST, with: expression, and: handler)
     )
   }
 
   // MARK: Put
   public func put<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.PUT, with: pathParser, and: handler)
+      Router.generate(.PUT, with: pathParser, and: handler)
     )
   }
 
   public func put(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.PUT, with: expression, and: handler)
+      Router.generate(.PUT, with: expression, and: handler)
     )
   }
 
@@ -85,13 +85,13 @@ extension Router {
   // MARK: Patch
   public func patch<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.PATCH, with: pathParser, and: handler)
+      Router.generate(.PATCH, with: pathParser, and: handler)
     )
   }
 
   public func patch(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.PATCH, with: expression, and: handler)
+      Router.generate(.PATCH, with: expression, and: handler)
     )
   }
 
@@ -99,20 +99,20 @@ extension Router {
   // MARK: Delete
   public func delete<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
     use(
-      generate(.DELETE, with: pathParser, and: handler)
+      Router.generate(.DELETE, with: pathParser, and: handler)
     )
   }
 
 
   public func delete(_ expression: PathExpression, handler: @escaping HTTPHandler) {
     use(
-      generate(.DELETE, with: expression, and: handler)
+      Router.generate(.DELETE, with: expression, and: handler)
     )
   }
 
 
   // MARK: Private Members
-  private func generate<T>(
+  static func generate<T>(
     _ method: HTTPMethod = .GET,
     with builder: T,
     and handler: @escaping HTTPHandler

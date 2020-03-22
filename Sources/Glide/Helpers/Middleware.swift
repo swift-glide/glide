@@ -1,5 +1,11 @@
 import Foundation
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin.C
+#endif
+
 public typealias Handler = () -> Void
 public typealias HTTPHandler = (Request, Response) throws -> Void
 public typealias ErrorHandler = ([Error], Request, Response) -> Void
@@ -52,6 +58,31 @@ public let consoleLogger = {
 public let errorLogger: ErrorHandler = { errors, request, response in
   errors.forEach {
     print("Error:", $0.localizedDescription)
+  }
+}
+
+public let workingDirectory: String = {
+  let cwd = getcwd(nil, Int(PATH_MAX))
+  defer { free(cwd) }
+  return cwd.flatMap { String(validatingUTF8: $0) } ?? "./"
+}()
+
+public func staticFileHandler(_
+  directory: String = "/Public",
+  workingDirectory: String = workingDirectory,
+  path: PathExpression? = nil
+) -> Middleware {
+  let assetDirName = directory.hasPrefix("/") ? String(directory.dropFirst()) : directory
+  var assetPath = workingDirectory + "/" + assetDirName
+  assetPath = assetPath.hasSuffix("/") ? String(assetPath.dropFirst()) : assetPath
+
+  print("Serving static files from: \(assetPath)")
+
+  let path = path ?? "\(wildcard: .all)"
+
+  return Router.generate(.GET, with: path) { request, response in
+    let filePath = request.pathParameters.wildcards.joined(separator: "/")
+    try response.file(at: "\(assetPath)/\(filePath)", for: request)
   }
 }
 

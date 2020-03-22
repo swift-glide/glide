@@ -13,8 +13,8 @@ class GlideTests: XCTestCase {
     continueAfterFailure = false
   }
 
-  func performHTTPTest(_ test: (_ app: Glide, _ client: HTTPClient) throws -> Void) {
-    let app = Glide(.testing)
+  func performHTTPTest(_ test: (_ app: Application, _ client: HTTPClient) throws -> Void) {
+    let app = Application(.testing)
     app.listen(testPort)
     defer { app.shutdown() }
 
@@ -57,7 +57,7 @@ class AppTests: GlideTests {
   }
 
   func testGracefulShutdown() throws {
-    let app = Glide(.testing)
+    let app = Application(.testing)
 
     app.listen(testPort)
     app.shutdown()

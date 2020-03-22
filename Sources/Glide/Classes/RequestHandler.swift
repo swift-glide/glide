@@ -9,8 +9,13 @@ final class HTTPServerHandler: ChannelInboundHandler {
   let router: Router
   var request: Request?
   var response: Response?
+  let application: Application
 
-  init(router: Router) {
+  init(
+    application: Application,
+    router: Router
+  ) {
+    self.application = application
     self.router = router
   }
 
@@ -19,7 +24,7 @@ final class HTTPServerHandler: ChannelInboundHandler {
 
     switch requestPart {
     case .head(let header):
-      request = Request(header: header, eventLoop: context.eventLoop)
+      request = Request(application: application, header: header, eventLoop: context.eventLoop)
       response = Response(channel: context.channel)
       
     case .body(var byteBuffer):
