@@ -68,7 +68,7 @@ swift run
 Once the project is running either via Xcode or the Swift CLI, run the following in your terminal:
 
 ```shell
-curl http://localhost:1337/hello
+curl "http://localhost:1337/hello"
 # -> "Hello, 2020!"
 ```
 
@@ -162,7 +162,7 @@ app.get("/todos") { request, response in
 and in the shell:
 
 ```shell
-curl http://localhost:1337/todos?sortOrder=ASC
+curl "http://localhost:1337/todos?sortOrder=ASC"
 ```
 
 PS: Path and query parameters might change in the future based on usage feedback.
