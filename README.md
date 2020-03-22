@@ -172,7 +172,7 @@ PS: Path and query parameters might change in the future based on usage feedback
 Sometimes a route has to match any request path, storing unnnamed path components for later perusal. In those case, the `wildcard` custom interploiation in `PathExpression` comes in handy:
 
 ```swift
-app.get(/todo/\(wildcard: .all))
+app.get(/todos/\(wildcard: .all))
 /* This will match all the following:
   /todos/foo/bar
   /todos
