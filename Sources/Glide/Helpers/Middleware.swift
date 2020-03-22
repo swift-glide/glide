@@ -61,20 +61,24 @@ public let errorLogger: ErrorHandler = { errors, request, response in
   }
 }
 
-let workingDirectory: String = {
+public let workingDirectory: String = {
   let cwd = getcwd(nil, Int(PATH_MAX))
   defer { free(cwd) }
   return cwd.flatMap { String(validatingUTF8: $0) } ?? "./"
 }()
 
-public func staticFileHandler(_ directory: String = "/static") -> Middleware {
+public func staticFileHandler(_
+  directory: String = "/Public",
+  workingDirectory: String = workingDirectory,
+  path: PathExpression? = nil
+) -> Middleware {
   let assetDirName = directory.hasPrefix("/") ? String(directory.dropFirst()) : directory
   var assetPath = workingDirectory + "/" + assetDirName
   assetPath = assetPath.hasSuffix("/") ? String(assetPath.dropFirst()) : assetPath
 
   print("Serving static files from: \(assetPath)")
 
-  let path: PathExpression = "\(literal: assetDirName)/\(wildcard: .all)"
+  let path = path ?? "\(wildcard: .all)"
 
   return Router.generate(.GET, with: path) { request, response in
     let filePath = request.pathParameters.wildcards.joined(separator: "/")

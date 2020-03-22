@@ -5,6 +5,17 @@ import AsyncHTTPClient
 import XCTest
 @testable import Glide
 
+let testWorkingDirectory: String = {
+  return String(
+    URL(fileURLWithPath: #file)
+      .pathComponents
+      .dropLast()
+      .joined(separator: "/")
+      .dropFirst()
+  )
+}()
+
+
 final class StaticFileTests: GlideTests {
   func testTextFile() throws {
     let expectation = XCTestExpectation()
@@ -13,7 +24,7 @@ final class StaticFileTests: GlideTests {
       app.use(
         consoleLogger,
         corsHandler(allowOrigin: "*"),
-        staticFileHandler()
+        staticFileHandler(workingDirectory: testWorkingDirectory)
       )
 
       app.use(errorLogger, { errors, _, _ in
@@ -21,7 +32,7 @@ final class StaticFileTests: GlideTests {
       })
 
       let request = try HTTPClient.Request(
-        url: "http://localhost:\(testPort)/static/sample.txt",
+        url: "http://localhost:\(testPort)/sample.txt",
         method: .GET,
         headers: .init()
       )
