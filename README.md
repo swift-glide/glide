@@ -122,11 +122,9 @@ For example, if you want your app to return a list of todos when the user visits
 app.get("/todos") { request, response in
   let todos = ... // Get a list of todos from a database, file, remote server, etc.
   
-  response.json(todos)
+  return .json(todos)
 }
 ```
-
-Notice how the `get()`  middleware generator doesn't require you to worry about the next handler closure. This also implies that you have to finalize the response and send it back, in this case as a JOSN response using the `response.json()` helper.
 
 #### Parameters & Queries
 
@@ -141,7 +139,7 @@ app.get("/todos/\("id", as: Int.self)") { request, response in
   let id: Int = request.pathParameters.id 
   
   if let todo = findTodo(id) {
-    response.json(todo)
+    return .json(todo)
   } else {
     throw CustomError.todoNotFound  
   }
@@ -156,7 +154,7 @@ app.get("/todos") { request, response in
   let sortOrder = request.queryParameters.sortOrder ?? "DESC"
   let sortedTodos = ... // Get a list of todos with the sort order.
   
-  response.json(sortedTodos)
+  return .json(sortedTodos)
 }
 ```
 and in the shell:
