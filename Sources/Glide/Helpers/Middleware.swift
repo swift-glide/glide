@@ -12,16 +12,7 @@ public enum MiddlewareResult {
   case send(String)
   case data(Data)
   case file(String)
-
-  public var isFinal: Bool {
-    switch self {
-    case .next:
-      return true
-    default:
-      return false
-    }
-  }
-
+  
   public static func json<T: Encodable>(_ model: T) -> Self {
     if let data = try? JSONEncoder().encode(model) {
       return .data(data)
