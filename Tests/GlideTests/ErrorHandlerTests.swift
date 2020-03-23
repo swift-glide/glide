@@ -85,8 +85,8 @@ final class ErrorHandlerTests: GlideTests {
         throw CustomAbortError.someError
       }
 
-      app.use { _, response, _ in
-        response.send("Success")
+      app.use { _, _ in
+        return .send("Success")
       }
 
       let request = try HTTPClient.Request(

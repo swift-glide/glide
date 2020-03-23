@@ -11,11 +11,12 @@ final class RoutingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("hello/\("foo")/\("bar", as: Int.self)") { request, response in
-        response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
         XCTAssertEqual(request.pathParameters.bar, 58)
         expectation.fulfill()
+
+        return .send(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -35,12 +36,13 @@ final class RoutingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/hello/\("foo")/\("bar")/baz/\("qux", as: Int.self)/") { request, response in
-        response.send(request.pathParameters.foo ?? "")
 
         XCTAssertEqual(request.pathParameters.foo, "test")
         XCTAssertEqual(request.pathParameters.bar, "glide")
         XCTAssertEqual(request.pathParameters.qux, 58)
         expectation.fulfill()
+
+        return .send(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -60,15 +62,15 @@ final class RoutingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/hello/{foo}/{bar:string}/baz/{qux:int}/") { request, response in
-        response.send(request.pathParameters.foo ?? "")
+        return .send(request.pathParameters.foo ?? "")
       }
 
       app.get("/hello") { request, response in
-        response.send(request.pathParameters.foo ?? "")
+        return .send(request.pathParameters.foo ?? "")
       }
 
       app.get("/help") { request, response in
-        response.send(request.pathParameters.foo ?? "")
+        return .send(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -97,12 +99,13 @@ final class RoutingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/hello/\(wildcard: .one)/bar/\(wildcard: .one)/baz") { request, response in
-        response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.wildcards.count, 2)
         XCTAssertEqual(request.pathParameters.wildcards[0], "foo")
         XCTAssertEqual(request.pathParameters.wildcards[1], "qux")
 
         expectation.fulfill()
+        
+        return .send(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -122,12 +125,13 @@ final class RoutingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("hello/\("param")/\(wildcard: .all)/\("never")") { request, response in
-        response.send(request.pathParameters.foo ?? "")
         XCTAssertEqual(request.pathParameters.param, "foo")
         XCTAssertNil(request.pathParameters["never"]?.asString())
         XCTAssertTrue(request.pathParameters.wildcards.contains("baz"))
         XCTAssertEqual(request.pathParameters.wildcards, ["bar", "baz", "qux"])
         expectation.fulfill()
+
+        return .send(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -153,8 +157,9 @@ final class RoutingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get(MyCustomParser()) { request, response in
-        response.send("Matching successful")
         expectation.fulfill()
+
+        return .send("Matching successful")
       }
 
       let request = try HTTPClient.Request(

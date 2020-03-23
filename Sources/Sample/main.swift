@@ -50,7 +50,7 @@ app.use(errorLogger, { errors, _, _ in
   print(errors.count, "error(s) encountered.")
 })
 
-app.use { _, _, _ in
+app.use { _, _ in
   throw CustomError.missingUser
 }
 
@@ -63,7 +63,7 @@ app.get("/abort") { _, _ in
 }
 
 app.get("/hello/\("name")") { request, response in
-  response.send("Hello, \(request.pathParameters.name ?? "world")!")
+  .send("Hello, \(request.pathParameters.name ?? "world")!")
 }
 
 app.get("/users/\("id", as: Int.self)") { request, response in
@@ -71,7 +71,7 @@ app.get("/users/\("id", as: Int.self)") { request, response in
     User(id: id)
   }
 
-  response.json(find(request.pathParameters.id ?? 0))
+  return .json(find(request.pathParameters.id ?? 0))
 }
 
 app.post("/post") { request, response in
@@ -81,10 +81,10 @@ app.post("/post") { request, response in
 
   do {
     let user = try JSONDecoder().decode(User.self, from: data)
-    response.send("\(user.name)")
+    return .send("\(user.name)")
   } catch let error as DecodingError {
     throw error
   }
 }
 
-app.listen(1337)
+try app.listen(1337)

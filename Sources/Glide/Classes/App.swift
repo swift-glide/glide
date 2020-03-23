@@ -54,7 +54,7 @@ public final class Application: Router {
         try serverChannel!.closeFuture.wait()
       }
     } catch {
-      fatalError("Failed to start server: \(error.localizedDescription)")
+      fatalError("Failed to start server: \(error)")
     }
   }
 
