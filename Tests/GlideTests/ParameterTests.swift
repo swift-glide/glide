@@ -11,11 +11,12 @@ final class ParameterTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/query") { request, response in
-        response.send(request.queryParameters.foo ?? "")
 
         XCTAssertEqual(request.queryParameters["foo"]?.asString(), "bar")
         XCTAssertEqual(request.queryParameters.baz, "qux")
         expectation.fulfill()
+        
+        return .send(request.queryParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -35,8 +36,6 @@ final class ParameterTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/query") { request, response in
-        response.send(request.queryParameters.foo ?? "")
-
         XCTAssertEqual(request.queryParameters["foo"]?.asInt(), 12)
         XCTAssertEqual(request.queryParameters.foo, 12)
 
@@ -50,6 +49,8 @@ final class ParameterTests: GlideTests {
         XCTAssertEqual(request.queryParameters.thud, true)
 
         expectation.fulfill()
+
+        return .send(request.queryParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -69,7 +70,6 @@ final class ParameterTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/query") { request, response in
-        response.send(request.queryParameters.foo ?? "")
 
         XCTAssertEqual(request.queryParameters["foo"]?.asBool(), true)
         XCTAssertTrue(request.queryParameters.foo ?? false)
@@ -80,6 +80,8 @@ final class ParameterTests: GlideTests {
         XCTAssertNotEqual(request.queryParameters.bar, false)
 
         expectation.fulfill()
+
+        return .send(request.queryParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(

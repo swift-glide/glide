@@ -42,13 +42,13 @@ extension Router {
 // MARK: - HTTP Methods
 extension Router {
   // MARK: Get
-  public func get<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
+  public func get<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
       Router.generate(with: pathParser, and: handler)
     )
   }
 
-  public func get(_ expression: PathExpression, handler: @escaping HTTPHandler) {
+  public func get(_ expression: PathExpression, handler: @escaping Middleware) {
     use(
       Router.generate(with: expression, and: handler)
     )
@@ -56,26 +56,26 @@ extension Router {
 
 
   // MARK: Post
-  public func post<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
+  public func post<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
       Router.generate(.POST, with: pathParser, and: handler)
     )
   }
 
-  public func post(_ expression: PathExpression, handler: @escaping HTTPHandler) {
+  public func post(_ expression: PathExpression, handler: @escaping Middleware) {
     use(
       Router.generate(.POST, with: expression, and: handler)
     )
   }
 
   // MARK: Put
-  public func put<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
+  public func put<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
       Router.generate(.PUT, with: pathParser, and: handler)
     )
   }
 
-  public func put(_ expression: PathExpression, handler: @escaping HTTPHandler) {
+  public func put(_ expression: PathExpression, handler: @escaping Middleware) {
     use(
       Router.generate(.PUT, with: expression, and: handler)
     )
@@ -83,13 +83,13 @@ extension Router {
 
 
   // MARK: Patch
-  public func patch<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
+  public func patch<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
       Router.generate(.PATCH, with: pathParser, and: handler)
     )
   }
 
-  public func patch(_ expression: PathExpression, handler: @escaping HTTPHandler) {
+  public func patch(_ expression: PathExpression, handler: @escaping Middleware) {
     use(
       Router.generate(.PATCH, with: expression, and: handler)
     )
@@ -97,14 +97,14 @@ extension Router {
 
 
   // MARK: Delete
-  public func delete<T>(_ pathParser: T, handler: @escaping HTTPHandler) where T: PathParsing {
+  public func delete<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
       Router.generate(.DELETE, with: pathParser, and: handler)
     )
   }
 
 
-  public func delete(_ expression: PathExpression, handler: @escaping HTTPHandler) {
+  public func delete(_ expression: PathExpression, handler: @escaping Middleware) {
     use(
       Router.generate(.DELETE, with: expression, and: handler)
     )
@@ -115,18 +115,18 @@ extension Router {
   static func generate<T>(
     _ method: HTTPMethod = .GET,
     with builder: T,
-    and handler: @escaping HTTPHandler
+    and handler: @escaping Middleware
   ) -> Middleware  where T: PathParsing {
-    { request, response, nextHandler in
-      guard request.header.method == method else { return nextHandler() }
+    { request, response in
+      guard request.header.method == method else { return .next }
 
       let (isMatching, parameters) = builder.parse(request.header.uri)
 
       if isMatching, let params = parameters {
         request.pathParameters = params
-        try finalize(handler)(request, response, nextHandler)
+        return try handler(request, response)
       } else {
-        return nextHandler()
+        return .next
       }
     }
   }
@@ -161,7 +161,17 @@ extension Router {
     func pop() {
       if let middleware = stack.popFirst() {
         do {
-          try middleware(request, response, self.pop)
+          let result = try middleware(request, response)
+          switch result {
+          case .next:
+            self.pop()
+          case .send(let text):
+            response.send(text)
+          case .file(let path):
+            try response.file(at: path, for: request)
+          case .data(let value):
+            response.send(value)
+          }
         } catch {
           errors.append(error)
 

@@ -94,15 +94,7 @@ public extension Response {
     }
   }
 
-  func json<T: Encodable>(_ model: T) {
-    let data : Data
-
-    do {
-      data = try JSONEncoder().encode(model)
-    } catch {
-      return handleError(error)
-    }
-
+  func send(_ data: Data) {
     self["Content-Type"] = "application/json"
     self["Content-Length"] = "\(data.count)"
 
@@ -116,5 +108,16 @@ public extension Response {
     channel.writeAndFlush(bodypart)
       .recover(handleError)
       .whenSuccess(end)
+  }
+
+  func send<T: Encodable>(_ model: T) {
+    let data : Data
+
+    do {
+      data = try JSONEncoder().encode(model)
+      send(data)
+    } catch {
+      return handleError(error)
+    }
   }
 }

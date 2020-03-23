@@ -6,26 +6,31 @@ import Glibc
 import Darwin.C
 #endif
 
-public typealias Handler = () -> Void
-public typealias HTTPHandler = (Request, Response) throws -> Void
-public typealias ErrorHandler = ([Error], Request, Response) -> Void
 
-public typealias Middleware = (
-  _ request: Request,
-  _ response: Response,
-  _ next: @escaping () -> Void
-) throws -> Void
-
-public func passthrough(_ perform: @escaping HTTPHandler) -> Middleware {
-  return { request, response, nextHandler in
-    try perform(request, response)
-    nextHandler()
+public enum MiddlewareResult {
+  case next
+  case send(String)
+  case data(Data)
+  case file(String)
+  
+  public static func json<T: Encodable>(_ model: T) -> Self {
+    if let data = try? JSONEncoder().encode(model) {
+      return .data(data)
+    } else {
+      return .next
+    }
   }
 }
 
-public func finalize(_ perform: @escaping HTTPHandler) -> Middleware {
-  return { request, response, _ in
+public typealias Handler = () -> Void
+public typealias Middleware = (Request, Response) throws -> MiddlewareResult
+public typealias HTTPHandler = (Request, Response) throws -> Void
+public typealias ErrorHandler = ([Error], Request, Response) -> Void
+
+public func passthrough(_ perform: @escaping HTTPHandler) -> Middleware {
+  return { request, response in
     try perform(request, response)
+    return .next
   }
 }
 
@@ -82,21 +87,21 @@ public func staticFileHandler(_
 
   return Router.generate(.GET, with: path) { request, response in
     let filePath = request.pathParameters.wildcards.joined(separator: "/")
-    try response.file(at: "\(assetPath)/\(filePath)", for: request)
+    return .file("\(assetPath)/\(filePath)")
   }
 }
 
 public func corsHandler(allowOrigin origin: String) -> Middleware {
-  { request, response, nextHandler in
+  { request, response in
     response["Access-Control-Allow-Origin"] = origin
     response["Access-Control-Allow-Headers"] = "Accept, Content-Type"
     response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
 
     if request.header.method == .OPTIONS {
       response["Allow"] = "GET, OPTIONS"
-      response.send("")
+      return .send("")
     } else {
-      nextHandler()
+      return .next
     }
   }
 }

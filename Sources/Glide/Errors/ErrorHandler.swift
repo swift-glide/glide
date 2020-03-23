@@ -20,7 +20,7 @@ let errorHandler: ErrorHandler = { errors, request, response in
     errorDescription = "Unknown internal error."
   }
 
-  response.json(
+  response.send(
     Router.ErrorResponse(error: errorDescription)
   )
 }

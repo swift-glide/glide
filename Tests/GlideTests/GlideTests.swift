@@ -34,8 +34,8 @@ class AppTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("/ping") { request, response in
-        response.send("pong")
+      app.get("/ping") { _, _ in
+        return .send("pong")
       }
 
       let request = try HTTPClient.Request(

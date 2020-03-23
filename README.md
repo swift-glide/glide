@@ -43,8 +43,8 @@ import Glide
 let app = Application()
 
 // 3. Add a route.
-app.get("/hello") { _, response in
-  response.send("Hello, world!")
+app.get("/hello") { _, _ in
+  .send("Hello, world!")
 }
 
 // 4. Start listening on a given port
@@ -76,30 +76,30 @@ curl "http://localhost:1337/hello"
 
 Glide uses a highly flexible middleware architecture. Each request will go through a chain of middleware functions matching its route and triggering side-effects such as reading from a database or fetching data from a remote server.
 
-A middleware function receives a request, a response, and a closure. It can modify both the request and the response. It can also decide to to call the closure to handover the request/response pair to the next middleware in the chain. If it opts out of calling `next()`, it needs to finalize the response and send it back using one of the provided methods.
-
+A middleware function receives a request and a response and return a result. It can modify both the request and the response, which are reference types.
 When an error occurs in the body of the middleware function, it can be thrown and left for other error handlers to catch. More on error handling later.
 
 The middleware signature is the following:
 
 ```swift
-typealias Middleware = (
-  _ request: Request,
-  _ response: Response,
-  _ next: @escaping () -> Void
-) throws -> Void
+typealias Middleware = (Request, Response) throws -> MiddlewareResult
+
+enum MiddlewareResult {
+  case next
+  case send(String)
+  case data(Data)
+  case file(String)
+  
+  static func json<T: Encodable>(_ model: T) -> Self { ... }
+}
 ```
 
 Any function that has the same signature can be used as middleware. Here is a function that adds a response header to any response that goes through it.
 
 ```swift
-func waldoMiddleware(
-_ request: Request,
-_ response: Response,
-_ next: @escaping () -> Void
-) throws {
+func waldoMiddleware(_ request: Request, _ response: Response) throws -> MiddlewareResult {
   response["My-Header"] = "waldo"
-  next()
+  return .next
 }
 ```
 
@@ -110,7 +110,7 @@ let app = Application()
 app.use(waldoMiddleware)
 ```
 
-For convenience, Glide introduces a number of middleware generators that handle the most common use cases such as creating passhtrough middleware, routing, CORS, etc. More on these in dedicated sections.
+For convenience, Glide introduces a number of middleware generators that handle the most common use cases such as routing, CORS, etc. More on these in dedicated sections.
 
 ### Routing
 
@@ -122,11 +122,9 @@ For example, if you want your app to return a list of todos when the user visits
 app.get("/todos") { request, response in
   let todos = ... // Get a list of todos from a database, file, remote server, etc.
   
-  response.json(todos)
+  return .json(todos)
 }
 ```
-
-Notice how the `get()`  middleware generator doesn't require you to worry about the next handler closure. This also implies that you have to finalize the response and send it back, in this case as a JOSN response using the `response.json()` helper.
 
 #### Parameters & Queries
 
@@ -141,7 +139,7 @@ app.get("/todos/\("id", as: Int.self)") { request, response in
   let id: Int = request.pathParameters.id 
   
   if let todo = findTodo(id) {
-    response.json(todo)
+    return .json(todo)
   } else {
     throw CustomError.todoNotFound  
   }
@@ -156,7 +154,7 @@ app.get("/todos") { request, response in
   let sortOrder = request.queryParameters.sortOrder ?? "DESC"
   let sortedTodos = ... // Get a list of todos with the sort order.
   
-  response.json(sortedTodos)
+  return .json(sortedTodos)
 }
 ```
 and in the shell:
