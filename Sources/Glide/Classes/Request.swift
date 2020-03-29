@@ -23,7 +23,7 @@ public final class Request {
 }
 
 extension Request {
-  public var fileIO: FileReader {
+  public var fileReader: FileReader {
     return .init(
       fileIO: application.fileIO,
       allocator: application.allocator,

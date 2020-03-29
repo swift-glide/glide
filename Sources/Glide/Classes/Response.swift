@@ -82,7 +82,7 @@ public extension Response {
 
 public extension Response {
   func file(at path: String, for request: Request) throws {
-    try request.fileIO.readEntireFile(at: path)
+    try request.fileReader.readEntireFile(at: path)
       .whenSuccess { buffer in
         self.flushHeader()
 
