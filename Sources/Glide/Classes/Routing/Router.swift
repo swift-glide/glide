@@ -1,5 +1,6 @@
 import Foundation
 import NIOHTTP1
+import NIO
 
 public class Router {
   private var middlewares = [Middleware]()
@@ -10,15 +11,9 @@ public class Router {
   }
 
   func unwind(
-    request: Request?,
-    response: Response?
-  ) {
-    guard let request = request,
-      let response = response else {
-        assertionFailure("Request and response were not initialized.")
-        return
-    }
-
+    request: Request,
+    response: Response
+  ) -> EventLoopFuture<Void> {
     MiddlewareStack(
       stack: middlewares[middlewares.indices],
       errorHandlers: errorHandlers[errorHandlers.indices],
@@ -28,6 +23,7 @@ public class Router {
     .pop()
   }
 }
+
 // MARK: - Error Handling
 extension Router {
   public func use(_ errorHandler: ErrorHandler...) {
@@ -53,7 +49,6 @@ extension Router {
       Router.generate(with: expression, and: handler)
     )
   }
-
 
   // MARK: Post
   public func post<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
@@ -81,7 +76,6 @@ extension Router {
     )
   }
 
-
   // MARK: Patch
   public func patch<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
@@ -95,7 +89,6 @@ extension Router {
     )
   }
 
-
   // MARK: Delete
   public func delete<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
     use(
@@ -103,13 +96,11 @@ extension Router {
     )
   }
 
-
   public func delete(_ expression: PathExpression, handler: @escaping Middleware) {
     use(
       Router.generate(.DELETE, with: expression, and: handler)
     )
   }
-
 
   // MARK: Private Members
   static func generate<T>(
@@ -158,28 +149,35 @@ extension Router {
       self.response = response
     }
 
-    func pop() {
+    func pop() -> EventLoopFuture<Void> {
       if let middleware = stack.popFirst() {
         do {
           let result = try middleware(request, response)
           switch result {
           case .next:
-            self.pop()
+            return pop()
           case .send(let text):
             response.send(text)
           case .file(let path):
-            try response.file(at: path, for: request)
+            return try sendFile(
+              at: path,
+              response: response,
+              request: request
+            )
           case .data(let value):
             response.send(value)
           }
+
+          return request.eventLoop.makeSucceededFuture(())
         } catch {
           errors.append(error)
 
           switch error {
           case let error as AbortError:
             errorHandler([error], request, response)
+            return request.eventLoop.makeSucceededFuture(())
           default:
-            pop()
+            return pop()
           }
         }
       } else {
@@ -188,7 +186,20 @@ extension Router {
         }
 
         errorHandler([InternalError.unhandledRoute], request, response)
+        return request.eventLoop.makeSucceededFuture(())
       }
     }
   }
+}
+
+fileprivate func sendFile(
+  at path: String,
+  response: Response,
+  request: Request
+) throws -> EventLoopFuture<Void> {
+  try request.fileReader.readEntireFile(at: path)
+    .flatMap { buffer in
+      response.body = .buffer(buffer)
+      return request.eventLoop.makeSucceededFuture(())
+    }
 }

@@ -87,4 +87,4 @@ app.post("/post") { request, response in
   }
 }
 
-try app.listen(1337)
+app.listen(1337)

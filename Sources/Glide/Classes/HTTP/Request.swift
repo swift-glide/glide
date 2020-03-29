@@ -5,7 +5,7 @@ import NIO
 public final class Request {
   public let application: Application
   public let header: HTTPRequestHead
-  public var body: Data? = nil
+  public var body: ByteBuffer? = nil
   public var pathParameters = Parameters()
   public var queryParameters = Parameters()
   public var userInfo = [AnyHashable: Any]()

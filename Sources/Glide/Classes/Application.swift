@@ -2,27 +2,19 @@ import Foundation
 import NIO
 import NIOHTTP1
 
-public enum Environment: Equatable {
-  case development
-  case testing
-  case production
-  case custom(String)
-}
-
 public final class Application: Router {
   public private(set) var didShutdown: Bool
   public private(set) var environment: Environment
 
-  let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-  var serverChannel: Channel?
+  var allocator: ByteBufferAllocator = .init()
 
-  let threadPool = { () -> NIOThreadPool in
+  private let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+  private var serverChannel: Channel?
+  private let threadPool = { () -> NIOThreadPool in
     let threadPool = NIOThreadPool(numberOfThreads: NonBlockingFileIO.defaultThreadPoolSize)
     threadPool.start()
     return threadPool
   }()
-
-  var allocator: ByteBufferAllocator = .init()
 
   public init(_ environment: Environment = .development) {
     self.didShutdown = false
@@ -86,7 +78,11 @@ public final class Application: Router {
       .serverChannelOption(localAddressReuseOption, value: 1)
       .childChannelInitializer { channel in
         channel.pipeline.configureHTTPServerPipeline(withErrorHandling: true).flatMap {
-          channel.pipeline.addHandler(HTTPServerHandler(application: self, router: self))
+          channel.pipeline.addHandlers([
+            HTTPRequestSerializer(application: self),
+            HTTPResponseSerializer(),
+            HTTPConnectionHandler(router: self)
+          ])
         }
       }
       .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
