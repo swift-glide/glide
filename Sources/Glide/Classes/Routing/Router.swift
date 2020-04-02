@@ -103,18 +103,18 @@ extension Router {
   }
 
   // MARK: Private Members
-  static func generate<T>(
+  static func generate<T: PathParsing>(
     _ method: HTTPMethod = .GET,
     with builder: T,
     and handler: @escaping Middleware
-  ) -> Middleware  where T: PathParsing {
+  ) -> Middleware {
     { request, response in
       guard request.header.method == method else { return .next }
 
       let (isMatching, parameters) = builder.parse(request.header.uri)
 
-      if isMatching, let params = parameters {
-        request.pathParameters = params
+      if isMatching {
+        request.pathParameters = parameters
         return try handler(request, response)
       } else {
         return .next

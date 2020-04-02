@@ -148,7 +148,7 @@ final class RoutingTests: GlideTests {
 
   func testCustomPathMatching() throws {
     struct MyCustomParser: PathParsing {
-      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters?) {
+      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
         return (true, Parameters())
       }
     }

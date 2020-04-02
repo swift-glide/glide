@@ -3,7 +3,7 @@ import Foundation
 public protocol PathParsing {
   func parse(_ url: String) -> (
     isMatching: Bool,
-    parameters: Parameters?
+    parameters: Parameters
   )
 }
 
@@ -126,11 +126,11 @@ extension PathExpression: ExpressibleByStringInterpolation {
 extension PathExpression: PathParsing {
   public func parse(_ url: String) -> (
     isMatching: Bool,
-    parameters: Parameters?
+    parameters: Parameters
   ) {
 
     guard let urlComponents = URLComponents(string: url) else {
-      return (false, nil)
+      return (false, .init())
     }
 
     var parameters = Parameters()
@@ -143,7 +143,7 @@ extension PathExpression: PathParsing {
         wildcards[index] = nil
 
         if value != pair.1 {
-          return (false, nil)
+          return (false, .init())
         }
 
       case let .parameter(name, type) where type == String.self:
@@ -152,7 +152,7 @@ extension PathExpression: PathParsing {
 
       case let .parameter(name, type):
         guard let value = type.init(String(pair.1)) else {
-          return (false, nil)
+          return (false, .init())
         }
 
         parameters[name] = value
