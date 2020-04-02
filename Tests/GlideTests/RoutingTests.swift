@@ -126,7 +126,7 @@ final class RoutingTests: GlideTests {
     performHTTPTest { app, client in
       app.get("hello/\("param")/\(wildcard: .all)/\("never")") { request, response in
         XCTAssertEqual(request.pathParameters.param, "foo")
-        XCTAssertNil(request.pathParameters["never"]?.asString())
+        XCTAssertNil(request.pathParameters["never"]?.as(String.self))
         XCTAssertTrue(request.pathParameters.wildcards.contains("baz"))
         XCTAssertEqual(request.pathParameters.wildcards, ["bar", "baz", "qux"])
         expectation.fulfill()

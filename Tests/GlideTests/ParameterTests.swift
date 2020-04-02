@@ -12,7 +12,7 @@ final class ParameterTests: GlideTests {
     performHTTPTest { app, client in
       app.get("/query") { request, response in
 
-        XCTAssertEqual(request.queryParameters["foo"]?.asString(), "bar")
+        XCTAssertEqual(request.queryParameters["foo"]?.as(String.self), "bar")
         XCTAssertEqual(request.queryParameters.baz, "qux")
         expectation.fulfill()
         
@@ -36,13 +36,13 @@ final class ParameterTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/query") { request, response in
-        XCTAssertEqual(request.queryParameters["foo"]?.asInt(), 12)
+        XCTAssertEqual(request.queryParameters["foo"]?.as(Int.self), 12)
         XCTAssertEqual(request.queryParameters.foo, 12)
 
-        XCTAssertEqual(request.queryParameters["bar"]?.asDouble(), 10.9)
+        XCTAssertEqual(request.queryParameters["bar"]?.as(Double.self), 10.9)
         XCTAssertEqual(request.queryParameters.bar, 10.9)
 
-        XCTAssertEqual(request.queryParameters["baz"]?.asFloat(), Float(10))
+        XCTAssertEqual(request.queryParameters["baz"]?.as(Float.self), Float(10))
         XCTAssertEqual(request.queryParameters.baz, Float(10))
 
         XCTAssertNotNil(request.queryParameters["qux"])
@@ -71,10 +71,10 @@ final class ParameterTests: GlideTests {
     performHTTPTest { app, client in
       app.get("/query") { request, response in
 
-        XCTAssertEqual(request.queryParameters["foo"]?.asBool(), true)
+        XCTAssertEqual(request.queryParameters["foo"]?.as(Bool.self), true)
         XCTAssertTrue(request.queryParameters.foo ?? false)
 
-        XCTAssertEqual(request.queryParameters["baz"]?.asBool(), false)
+        XCTAssertEqual(request.queryParameters["baz"]?.as(Bool.self), false)
         XCTAssertFalse(request.queryParameters.baz ?? true)
 
         XCTAssertNotEqual(request.queryParameters.bar, false)

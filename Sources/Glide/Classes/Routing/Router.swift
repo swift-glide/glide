@@ -51,7 +51,7 @@ extension Router {
   }
 
   // MARK: Post
-  public func post<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
+  public func post<T: PathParsing>(_ pathParser: T, handler: @escaping Middleware) {
     use(
       Router.generate(.POST, with: pathParser, and: handler)
     )
