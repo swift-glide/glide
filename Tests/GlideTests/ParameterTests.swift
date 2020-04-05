@@ -5,7 +5,7 @@ import AsyncHTTPClient
 import XCTest
 @testable import Glide
 
-final class ParameterTests: GlideTests {
+final class ParameterMatchingTests: GlideTests {
   func testQueryParameterString() throws {
     let expectation = XCTestExpectation()
 
@@ -82,6 +82,66 @@ final class ParameterTests: GlideTests {
         expectation.fulfill()
 
         return .send(request.queryParameters.foo ?? "")
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/query?foo=true&bar=0&baz=false",
+        method: .GET,
+        headers: .init()
+      )
+
+      _ = try client.execute(request: request).wait()
+    }
+
+    wait(for: [expectation], timeout: 5)
+  }
+
+  func testValidQueryParameter() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get("/query?\("foo")&\("baz")") { request, response in
+        XCTAssertEqual(request.queryParameters.foo, "bar")
+        XCTAssertEqual(request.queryParameters.baz, "qux")
+        XCTAssertEqual(request.queryParameters.thud, "xyzzy")
+        XCTAssertEqual(request.queryParameters.toto, "")
+        expectation.fulfill()
+
+        return .send(request.queryParameters.foo ?? "")
+      }
+
+      app.get("\(wildcard: .all)") { request, response in
+        XCTFail("The path expression didn't match the provided URL.")
+        expectation.fulfill()
+        return .send("Oops")
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/query?foo=bar&baz=qux&thud=xyzzy&toto",
+        method: .GET,
+        headers: .init()
+      )
+
+      _ = try client.execute(request: request).wait()
+    }
+
+    wait(for: [expectation], timeout: 5)
+  }
+
+  func testInvalidQueryParameter() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get("/query?\("thud")") { request, response in
+        XCTFail("The path expression should not match this URL.")
+        expectation.fulfill()
+        return .send("Oops")
+      }
+
+      app.get("\(wildcard: .all)") { request, response in
+        XCTAssert(true)
+        expectation.fulfill()
+        return .send("Yieet!")
       }
 
       let request = try HTTPClient.Request(

@@ -37,17 +37,10 @@ public func passthrough(_ perform: @escaping HTTPHandler) -> Middleware {
 // MARK: - Built-in Middleware
 
 let parameterParsingHandler: HTTPHandler = { request, _ in
-  guard let components = URLComponents(string: request.header.uri),
-    let queryItems = components.queryItems else { return }
+  guard let components = URLComponents(string: request.header.uri)
+    else { return }
 
-  request.queryParameters = Parameters(storage: Dictionary(
-    grouping: queryItems,
-    by: { $0.name }
-  ).mapValues {
-    $0.compactMap({ $0.value })
-      .joined(separator: ",")
-    }
-  )
+  request.queryParameters = queryParameters(with: components)
 }
 
 public let parameterParser = {
@@ -85,7 +78,7 @@ public func staticFileHandler(_
 
   let path = path ?? "\(wildcard: .all)"
 
-  return Router.generate(.GET, with: path) { request, response in
+  return Router.middleware(.GET, with: path) { request, response in
     let filePath = request.pathParameters.wildcards.joined(separator: "/")
     return .file("\(assetPath)/\(filePath)")
   }

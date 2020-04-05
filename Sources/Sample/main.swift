@@ -50,10 +50,6 @@ app.use(errorLogger, { errors, _, _ in
   print(errors.count, "error(s) encountered.")
 })
 
-app.use { _, _ in
-  throw CustomError.missingUser
-}
-
 app.get("/throw") { _, _ in
   throw CustomError.nonCriticalError
 }
