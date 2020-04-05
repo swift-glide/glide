@@ -26,7 +26,6 @@ public final class Application: Router {
   private func configure() {
     use(parameterParser)
   }
-
   public func listen(
     _ port: Int,
     _ host: String = "localhost",

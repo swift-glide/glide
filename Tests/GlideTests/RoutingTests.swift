@@ -5,7 +5,7 @@ import AsyncHTTPClient
 import XCTest
 @testable import Glide
 
-final class RoutingTests: GlideTests {
+final class PathMatchingTests: GlideTests {
   func testPathMatching() throws {
     let expectation = XCTestExpectation()
 
@@ -147,9 +147,9 @@ final class RoutingTests: GlideTests {
   }
 
   func testCustomPathMatching() throws {
-    struct MyCustomParser: PathParsing {
-      func parse(_ url: String) -> (isMatching: Bool, parameters: Parameters) {
-        return (true, Parameters())
+    struct MyCustomParser: URIMatching {
+      func match(_ url: String) -> URIMatchingResult {
+        return .matching(pathParameters: .init(), queryParameters: nil)
       }
     }
 

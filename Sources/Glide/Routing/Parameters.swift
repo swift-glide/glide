@@ -29,15 +29,32 @@ public protocol ParameterRepresentable: CustomStringConvertible {
   init?(_ string: String)
 }
 
-extension ParameterRepresentable {
+public extension ParameterRepresentable {
   func `as`<T: ParameterRepresentable>(_ type: T.Type) -> T? {
     self as? T ?? T(description)
   }
 }
 
+public extension Parameters {
+  func JSONData() throws -> Data {
+    try JSONSerialization.data(withJSONObject: storage)
+  }
+
+  func merge(with params: Parameters) -> Parameters {
+    var mergedParameters = Parameters(
+      storage: storage.merging(
+        params.storage,
+        uniquingKeysWith: { lhp, rhp in return lhp }
+      )
+    )
+    mergedParameters.wildcards = wildcards + params.wildcards
+
+    return mergedParameters
+  }
+}
+
 extension Int: ParameterRepresentable {}
 extension String: ParameterRepresentable {}
-extension Substring: ParameterRepresentable {}
 extension Double: ParameterRepresentable {}
 extension Float: ParameterRepresentable {}
 extension Bool: ParameterRepresentable {}

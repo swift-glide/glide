@@ -37,88 +37,103 @@ extension Router {
 
 // MARK: - HTTP Methods
 extension Router {
+  public func route<T: URIMatching>(
+    _ method: HTTPMethod = .GET,
+    _ uriMatcher: T,
+    middleware: @escaping Middleware
+  ) {
+     use(
+       Router.middleware(method, with: uriMatcher, and: middleware)
+     )
+   }
+
+   public func route(
+    _ method: HTTPMethod = .GET,
+    _ expression: PathExpression,
+    middleware: @escaping Middleware
+   ) {
+     use(
+       Router.middleware(method, with: expression, and: middleware)
+     )
+   }
+
   // MARK: Get
-  public func get<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
+  public func get<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
     use(
-      Router.generate(with: pathParser, and: handler)
+      Router.middleware(with: uriMatcher, and: middleware)
     )
   }
 
-  public func get(_ expression: PathExpression, handler: @escaping Middleware) {
+  public func get(_ expression: PathExpression, middleware: @escaping Middleware) {
     use(
-      Router.generate(with: expression, and: handler)
+      Router.middleware(with: expression, and: middleware)
     )
   }
 
   // MARK: Post
-  public func post<T: PathParsing>(_ pathParser: T, handler: @escaping Middleware) {
+  public func post<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
     use(
-      Router.generate(.POST, with: pathParser, and: handler)
+      Router.middleware(.POST, with: uriMatcher, and: middleware)
     )
   }
 
-  public func post(_ expression: PathExpression, handler: @escaping Middleware) {
+  public func post(_ expression: PathExpression, middleware: @escaping Middleware) {
     use(
-      Router.generate(.POST, with: expression, and: handler)
+      Router.middleware(.POST, with: expression, and: middleware)
     )
   }
 
   // MARK: Put
-  public func put<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
+  public func put<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
     use(
-      Router.generate(.PUT, with: pathParser, and: handler)
+      Router.middleware(.PUT, with: uriMatcher, and: middleware)
     )
   }
 
-  public func put(_ expression: PathExpression, handler: @escaping Middleware) {
+  public func put(_ expression: PathExpression, middleware: @escaping Middleware) {
     use(
-      Router.generate(.PUT, with: expression, and: handler)
+      Router.middleware(.PUT, with: expression, and: middleware)
     )
   }
 
   // MARK: Patch
-  public func patch<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
+  public func patch<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
     use(
-      Router.generate(.PATCH, with: pathParser, and: handler)
+      Router.middleware(.PATCH, with: uriMatcher, and: middleware)
     )
   }
 
-  public func patch(_ expression: PathExpression, handler: @escaping Middleware) {
+  public func patch(_ expression: PathExpression, middleware: @escaping Middleware) {
     use(
-      Router.generate(.PATCH, with: expression, and: handler)
+      Router.middleware(.PATCH, with: expression, and: middleware)
     )
   }
 
   // MARK: Delete
-  public func delete<T>(_ pathParser: T, handler: @escaping Middleware) where T: PathParsing {
+  public func delete<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
     use(
-      Router.generate(.DELETE, with: pathParser, and: handler)
+      Router.middleware(.DELETE, with: uriMatcher, and: middleware)
     )
   }
 
-  public func delete(_ expression: PathExpression, handler: @escaping Middleware) {
+  public func delete(_ expression: PathExpression, middleware: @escaping Middleware) {
     use(
-      Router.generate(.DELETE, with: expression, and: handler)
+      Router.middleware(.DELETE, with: expression, and: middleware)
     )
   }
 
   // MARK: Private Members
-  static func generate<T: PathParsing>(
+  static func middleware<T: URIMatching>(
     _ method: HTTPMethod = .GET,
-    with builder: T,
-    and handler: @escaping Middleware
+    with matcher: T,
+    and middleware: @escaping Middleware
   ) -> Middleware {
     { request, response in
-      guard request.header.method == method else { return .next }
-
-      let (isMatching, parameters) = builder.parse(request.header.uri)
-
-      if isMatching {
-        request.pathParameters = parameters
-        return try handler(request, response)
-      } else {
+      guard match(method, request: request, matcher: matcher) else {
         return .next
       }
+
+      return try middleware(request, response)
     }
   }
 }

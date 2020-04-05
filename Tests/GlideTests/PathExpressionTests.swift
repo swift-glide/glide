@@ -8,7 +8,7 @@ import XCTest
 final class PathExpressionTests: GlideTests {
   func testPathExpressionLiteral() throws {
     let expression: PathExpression = "/hello/\("foo")/\("bar")/baz/\("qux", as: Int.self)/"
-    let segments = expression.segments
+    let segments = expression.pathSegments
     XCTAssertFalse(segments.isEmpty)
     XCTAssertEqual(segments[0], .literal("hello"))
     XCTAssertEqual(segments[1], .parameter("foo"))
@@ -16,9 +16,9 @@ final class PathExpressionTests: GlideTests {
     XCTAssertEqual(segments[4], .parameter("qux", type: Int.self))
   }
 
-  func testPathBuilderWildcards() throws {
+  func testPathExpressionWildcards() throws {
     let expression: PathExpression = "/hello/\(wildcard: .one)/bar/\(wildcard: .one)/baz"
-    let segments = expression.segments
+    let segments = expression.pathSegments
     XCTAssertFalse(segments.isEmpty)
     XCTAssertEqual(segments[1], .wildcard())
     XCTAssertEqual(segments[3], .wildcard())
