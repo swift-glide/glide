@@ -1,11 +1,8 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
   name: "Glide",
-  platforms: [
-    .macOS(.v10_15)
-  ],
   products: [
     .library(name: "Glide", targets: ["Glide"]),
     .executable(name: "sample", targets: ["Sample"]),
@@ -18,21 +15,21 @@ let package = Package(
     .target(
       name: "Sample",
       dependencies: [
-        .target(name: "Glide"),
+        "Glide"
       ]
     ),
     .target(
       name: "Glide",
       dependencies: [
-        .product(name: "NIO", package: "swift-nio"),
-        .product(name: "NIOFoundationCompat", package: "swift-nio"),
-        .product(name: "NIOHTTP1", package: "swift-nio")
+        "NIO",
+        "NIOFoundationCompat",
+        "NIOHTTP1"
     ]),
     .testTarget(
       name: "GlideTests",
       dependencies: [
-        .target(name: "Glide"),
-        .product(name: "AsyncHTTPClient", package: "async-http-client"),
+        "Glide",
+        "AsyncHTTPClient"
     ]),
   ]
 )
