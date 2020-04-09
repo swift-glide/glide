@@ -27,8 +27,9 @@ final class StaticFileTests: GlideTests {
         staticFileHandler(workingDirectory: testWorkingDirectory)
       )
 
-      app.use(errorLogger, { errors, _, _ in
+      app.use(errorLogger, { errors, request, _ in
         print(errors.count, "error(s) encountered.")
+        return request.successFuture
       })
 
       let request = try HTTPClient.Request(

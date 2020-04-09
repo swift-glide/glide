@@ -1,4 +1,5 @@
 import Foundation
+import NIO
 
 #if os(Linux)
 import Glibc
@@ -7,7 +8,7 @@ import Darwin.C
 #endif
 
 
-public enum MiddlewareResult {
+public enum MiddlewareOutput {
   case next
   case send(String)
   case data(Data)
@@ -22,25 +23,25 @@ public enum MiddlewareResult {
   }
 }
 
-public typealias Handler = () -> Void
-public typealias Middleware = (Request, Response) throws -> MiddlewareResult
-public typealias HTTPHandler = (Request, Response) throws -> Void
-public typealias ErrorHandler = ([Error], Request, Response) -> Void
+public typealias Handler = () -> EventLoopFuture<Void>
+public typealias Middleware = (Request, Response) throws -> EventLoopFuture<MiddlewareOutput>
+public typealias HTTPHandler = (Request, Response) throws -> EventLoopFuture<Void>
+public typealias ErrorHandler = ([Error], Request, Response) -> EventLoopFuture<Void>
 
 public func passthrough(_ perform: @escaping HTTPHandler) -> Middleware {
   return { request, response in
-    try perform(request, response)
-    return .next
+    try perform(request, response).map { .next }
   }
 }
 
 // MARK: - Built-in Middleware
 
-let parameterParsingHandler: HTTPHandler = { request, _ in
+let parameterParsingHandler: HTTPHandler = { request, response in
   guard let components = URLComponents(string: request.header.uri)
-    else { return }
+    else { return request.successFuture }
 
   request.queryParameters = queryParameters(with: components)
+  return request.successFuture
 }
 
 public let parameterParser = {
@@ -50,6 +51,7 @@ public let parameterParser = {
 public let consoleLogger = {
   passthrough { request, response in
     print("\(request.header.method):", request.header.uri)
+    return  request.successFuture
   }
 }()
 
@@ -57,6 +59,8 @@ public let errorLogger: ErrorHandler = { errors, request, response in
   errors.forEach {
     print("Error:", $0.localizedDescription)
   }
+
+  return request.successFuture
 }
 
 public let workingDirectory: String = {
@@ -80,7 +84,7 @@ public func staticFileHandler(_
 
   return Router.middleware(.GET, with: path) { request, response in
     let filePath = request.pathParameters.wildcards.joined(separator: "/")
-    return .file("\(assetPath)/\(filePath)")
+    return response.successFuture(.file("\(assetPath)/\(filePath)"))
   }
 }
 
@@ -93,9 +97,9 @@ public func corsHandler(allowOrigin origin: String) -> Middleware {
 
     if request.header.method == .OPTIONS {
       response["Allow"] = "POST, GET, OPTIONS"
-      return .send("")
+      return response.successFuture(.send(""))
     } else {
-      return .next
+      return response.successFuture(.next)
     }
   }
 }

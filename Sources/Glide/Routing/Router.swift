@@ -130,7 +130,7 @@ extension Router {
   ) -> Middleware {
     { request, response in
       guard match(method, request: request, matcher: matcher) else {
-        return .next
+        return response.successFuture(.next)
       }
 
       return try middleware(request, response)
@@ -167,41 +167,46 @@ extension Router {
     func pop() -> EventLoopFuture<Void> {
       if let middleware = stack.popFirst() {
         do {
-          let result = try middleware(request, response)
-          switch result {
-          case .next:
-            return pop()
-          case .send(let text):
-            response.send(text)
-          case .file(let path):
-            return try sendFile(
-              at: path,
-              response: response,
-              request: request
-            )
-          case .data(let value):
-            response.send(value)
-          }
+          let outputFuture = try middleware(request, response)
 
-          return request.eventLoop.makeSucceededFuture(())
+          return outputFuture.flatMap { output in
+            switch output {
+            case .next:
+              return self.pop()
+            case .send(let text):
+              return self.response.send(text)
+
+            case .file(let path):
+              return sendFile(
+                at: path,
+                response: self.response,
+                request: self.request
+              )
+            case .data(let value):
+              return self.response.send(value)
+            }
+          }
         } catch {
           errors.append(error)
 
           switch error {
           case let error as AbortError:
-            errorHandler([error], request, response)
-            return request.eventLoop.makeSucceededFuture(())
+            return mainErrorHandler([error], request, response)
           default:
             return pop()
           }
         }
       } else {
-        errorHandlers.forEach {
-          $0(errors, request, response)
+       return EventLoopFuture<Void>.andAllSucceed(
+          errorHandlers.map { $0(errors, request, response) },
+          on: response.eventLoop
+        ).flatMap {
+          mainErrorHandler(
+            [InternalError.unhandledRoute],
+            self.request,
+            self.response
+          )
         }
-
-        errorHandler([InternalError.unhandledRoute], request, response)
-        return request.eventLoop.makeSucceededFuture(())
       }
     }
   }
@@ -211,10 +216,14 @@ fileprivate func sendFile(
   at path: String,
   response: Response,
   request: Request
-) throws -> EventLoopFuture<Void> {
-  try request.fileReader.readEntireFile(at: path)
-    .flatMap { buffer in
-      response.body = .buffer(buffer)
-      return request.eventLoop.makeSucceededFuture(())
+) -> EventLoopFuture<Void> {
+  do {
+    return try request.fileReader.readEntireFile(at: path)
+      .flatMap { buffer in
+        response.body = .buffer(buffer)
+        return request.successFuture
     }
+  } catch {
+    return request.failureFuture(error)
+  }
 }
