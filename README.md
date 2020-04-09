@@ -43,8 +43,8 @@ import Glide
 let app = Application()
 
 // 3. Add a route.
-app.get("/hello") { _, _ in
-  .send("Hello, world!")
+app.get("/hello") { _, response in
+  response.successFuture(.send("Hello, world!"))
 }
 
 // 4. Start listening on a given port
@@ -76,15 +76,15 @@ curl "http://localhost:1337/hello"
 
 Glide uses a highly flexible middleware architecture. Each request will go through a chain of middleware functions matching its route and triggering side-effects such as reading from a database or fetching data from a remote server.
 
-A middleware function receives a request and a response and return a result. It can modify both the request and the response, which are reference types.
+A middleware function receives a request and a response and return a future (of type  `EventLoopFuture`) wrapping an output. It can modify both the request and the response, which are reference types.
 When an error occurs in the body of the middleware function, it can be thrown and left for other error handlers to catch. More on error handling later.
 
 The middleware signature is the following:
 
 ```swift
-typealias Middleware = (Request, Response) throws -> MiddlewareResult
+typealias Middleware = (Request, Response) throws -> EventLoopFuture<MiddlewareOutput>
 
-enum MiddlewareResult {
+enum MiddlewareOutput {
   case next
   case send(String)
   case data(Data)
@@ -97,9 +97,9 @@ enum MiddlewareResult {
 Any function that has the same signature can be used as middleware. Here is a function that adds a response header to any response that goes through it.
 
 ```swift
-func waldoMiddleware(_ request: Request, _ response: Response) throws -> MiddlewareResult {
+func waldoMiddleware(_ request: Request, _ response: Response) throws -> EventLoopFuture<MiddlewareOutput> {
   response["My-Header"] = "waldo"
-  return .next
+  return response.successFuture(.next)
 }
 ```
 
@@ -122,7 +122,7 @@ For example, if you want your app to return a list of todos when the user visits
 app.get("/todos") { request, response in
   let todos = ... // Get a list of todos from a database, file, remote server, etc.
   
-  return .json(todos)
+  return response.successFuture(.json(todos))
 }
 ```
 

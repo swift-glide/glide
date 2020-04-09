@@ -31,3 +31,18 @@ extension Request {
     )
   }
 }
+
+public extension Request {
+  var successFuture: EventLoopFuture<Void> {
+    eventLoop.makeSucceededFuture(())
+  }
+
+  func successFuture<T>(_ value: T) -> EventLoopFuture<T> {
+    eventLoop.makeSucceededFuture(value)
+  }
+
+  func failureFuture<T>(_ error: Error) -> EventLoopFuture<T> {
+    eventLoop.makeFailedFuture(error)
+  }
+}
+

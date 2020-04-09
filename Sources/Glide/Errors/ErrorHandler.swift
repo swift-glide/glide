@@ -1,9 +1,9 @@
 import Foundation
 
-let errorHandler: ErrorHandler = { errors, request, response in
+let mainErrorHandler: ErrorHandler = { errors, request, response in
   guard let error = errors.first else {
     assertionFailure("No errors were passed to the main error handler.")
-    return
+    return request.successFuture
   }
 
   let errorDescription: String
@@ -20,7 +20,7 @@ let errorHandler: ErrorHandler = { errors, request, response in
     errorDescription = "Unknown internal error."
   }
 
-  response.send(
+  return response.send(
     Router.ErrorResponse(error: errorDescription)
   )
 }

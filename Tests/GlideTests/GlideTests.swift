@@ -29,13 +29,13 @@ class GlideTests: XCTestCase {
   }
 }
 
-class AppTests: GlideTests {  
+class AppTests: GlideTests {
   func testPing() throws {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.get("/ping") { _, _ in
-        return .send("pong")
+      app.get("/ping") { _, response in
+        return response.successFuture(.send("pong"))
       }
 
       let request = try HTTPClient.Request(

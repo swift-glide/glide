@@ -15,7 +15,7 @@ class HTTPConnectionHandler: ChannelInboundHandler {
 
   func channelRead(context: ChannelHandlerContext, data: NIOAny) {
     let request = unwrapInboundIn(data)
-    let response = Response()
+    let response = Response(eventLoop: context.eventLoop)
 
     router.unwind(request: request, response: response).whenSuccess {
       context.write(self.wrapInboundOut(response), promise: nil)

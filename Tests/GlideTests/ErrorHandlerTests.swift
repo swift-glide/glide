@@ -46,8 +46,9 @@ final class ErrorHandlerTests: GlideTests {
         throw CustomError.someError
       }
 
-      app.handleErrors { errors, _, _ in
+      app.handleErrors { errors, request, _ in
         caughtError = errors.first as? CustomError
+        return request.successFuture
       }
 
       let request = try HTTPClient.Request(
@@ -85,8 +86,8 @@ final class ErrorHandlerTests: GlideTests {
         throw CustomAbortError.someError
       }
 
-      app.use { _, _ in
-        return .send("Success")
+      app.use { _, response in
+        return response.successFuture(.send("Success"))
       }
 
       let request = try HTTPClient.Request(
