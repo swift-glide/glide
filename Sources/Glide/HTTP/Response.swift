@@ -37,13 +37,13 @@ public extension Response {
   }
 }
 
-public extension Response {
-  func send(_ text: String) -> EventLoopFuture<Void> {
+extension Response {
+  func with(_ text: String) -> Future<Void> {
     body = .string(text)
     return eventLoop.makeSucceededFuture(())
   }
 
-  func send(_ data: Data) -> EventLoopFuture<Void> {
+  func with(_ data: Data) -> Future<Void> {
     // TODO: Get proper content type.
     self["Content-Type"] = "application/json"
     self["Content-Length"] = "\(data.count)"
@@ -51,7 +51,7 @@ public extension Response {
     return eventLoop.makeSucceededFuture(())
   }
 
-  func send<T: Encodable>(_ model: T) -> EventLoopFuture<Void> {
+  func with<T: Encodable>(_ model: T) -> Future<Void> {
     let data : Data
 
     do {
@@ -59,18 +59,30 @@ public extension Response {
       body = .data(data)
     return eventLoop.makeSucceededFuture(())
     } catch {
-      print("Encoding error:", error)
+      print("Encoding Error:", error)
       return failure(error)
     }
   }
 }
 
 public extension Response {
-  func successFuture(_ output: MiddlewareOutput) -> EventLoopFuture<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(output)
+  func send(_ text: String) -> Future<MiddlewareOutput> {
+    eventLoop.makeSucceededFuture(.send(text))
   }
 
-  func failure<T>(_ error: Error) -> EventLoopFuture<T> {
+  func send(_ data: Data) -> Future<MiddlewareOutput> {
+    eventLoop.makeSucceededFuture(.data(data))
+  }
+
+  func file(_ path: String) -> Future<MiddlewareOutput> {
+    eventLoop.makeSucceededFuture(.file(path))
+  }
+
+  func json<T: Encodable>(_ model: T) -> Future<MiddlewareOutput> {
+    eventLoop.makeSucceededFuture(.json(model))
+  }
+
+  func failure<T>(_ error: Error) -> Future<T> {
     eventLoop.makeFailedFuture(error)
   }
 }
