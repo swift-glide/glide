@@ -16,7 +16,7 @@ public struct FileReader {
     self.request = request
   }
 
-  public func readEntireFile(at path: String) throws -> EventLoopFuture<ByteBuffer> {
+  public func readEntireFile(at path: String) throws -> Future<ByteBuffer> {
     var data = allocator.buffer(capacity: 0)
 
     return try readFile(at: path) { chunk in
@@ -29,8 +29,8 @@ public struct FileReader {
   public func readFile(
     at path: String,
     chunkSize: Int = NonBlockingFileIO.defaultChunkSize,
-    onRead: @escaping (ByteBuffer) -> EventLoopFuture<Void>
-  ) throws -> EventLoopFuture<Void> {
+    onRead: @escaping (ByteBuffer) -> Future<Void>
+  ) throws -> Future<Void> {
     let attributes = try FileManager.default.attributesOfItem(atPath: path)
 
     guard let fileSize = attributes[.size] as? NSNumber else {
@@ -50,8 +50,8 @@ public struct FileReader {
     at path: String,
     fileSize: Int,
     chunkSize: Int,
-    onRead: @escaping (ByteBuffer) -> EventLoopFuture<Void>
-  ) -> EventLoopFuture<Void> {
+    onRead: @escaping (ByteBuffer) -> Future<Void>
+  ) -> Future<Void> {
     do {
       let fileHandle = try NIOFileHandle(path: path)
       // TODO: Use FileRegion(fileHandle: NIOFileHandle)
