@@ -13,7 +13,7 @@ public class Router {
   func unwind(
     request: Request,
     response: Response
-  ) -> EventLoopFuture<Void> {
+  ) -> Future<Void> {
     MiddlewareStack(
       stack: middlewares[middlewares.indices],
       errorHandlers: errorHandlers[errorHandlers.indices],
@@ -130,7 +130,7 @@ extension Router {
   ) -> Middleware {
     { request, response in
       guard match(method, request: request, matcher: matcher) else {
-        return response.successFuture(.next)
+        return request.next()
       }
 
       return try middleware(request, response)
@@ -164,7 +164,7 @@ extension Router {
       self.response = response
     }
 
-    func pop() -> EventLoopFuture<Void> {
+    func pop() -> Future<Void> {
       if let middleware = stack.popFirst() {
         do {
           let outputFuture = try middleware(request, response)
@@ -174,7 +174,7 @@ extension Router {
             case .next:
               return self.pop()
             case .send(let text):
-              return self.response.send(text)
+              return self.response.with(text)
 
             case .file(let path):
               return sendFile(
@@ -182,8 +182,8 @@ extension Router {
                 response: self.response,
                 request: self.request
               )
-            case .data(let value):
-              return self.response.send(value)
+            case .data(let data):
+              return self.response.with(data)
             }
           }
         } catch {
@@ -197,7 +197,7 @@ extension Router {
           }
         }
       } else {
-       return EventLoopFuture<Void>.andAllSucceed(
+       return Future<Void>.andAllSucceed(
           errorHandlers.map { $0(errors, request, response) },
           on: response.eventLoop
         ).flatMap {
@@ -216,7 +216,7 @@ fileprivate func sendFile(
   at path: String,
   response: Response,
   request: Request
-) -> EventLoopFuture<Void> {
+) -> Future<Void> {
   do {
     return try request.fileReader.readEntireFile(at: path)
       .flatMap { buffer in

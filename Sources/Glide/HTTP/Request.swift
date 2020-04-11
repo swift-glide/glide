@@ -33,15 +33,19 @@ extension Request {
 }
 
 public extension Request {
-  var successFuture: EventLoopFuture<Void> {
+  func next() -> Future<MiddlewareOutput> {
+    eventLoop.makeSucceededFuture(.next)
+  }
+
+  var successFuture: Future<Void> {
     eventLoop.makeSucceededFuture(())
   }
 
-  func successFuture<T>(_ value: T) -> EventLoopFuture<T> {
+  func successFuture<T>(_ value: T) -> Future<T> {
     eventLoop.makeSucceededFuture(value)
   }
 
-  func failureFuture<T>(_ error: Error) -> EventLoopFuture<T> {
+  func failureFuture<T>(_ error: Error) -> Future<T> {
     eventLoop.makeFailedFuture(error)
   }
 }

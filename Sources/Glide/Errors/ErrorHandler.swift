@@ -20,7 +20,7 @@ let mainErrorHandler: ErrorHandler = { errors, request, response in
     errorDescription = "Unknown internal error."
   }
 
-  return response.send(
+  return response.with(
     Router.ErrorResponse(error: errorDescription)
   )
 }

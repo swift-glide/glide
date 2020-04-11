@@ -25,7 +25,7 @@ final class JSONTests: GlideTests {
           User(id: id)
         }
 
-        return response.successFuture(.json(find(request.pathParameters.id ?? 0)))
+        return response.json(find(request.pathParameters.id ?? 0))
       }
 
       let request = try HTTPClient.Request(

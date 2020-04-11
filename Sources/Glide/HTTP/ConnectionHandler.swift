@@ -17,8 +17,15 @@ class HTTPConnectionHandler: ChannelInboundHandler {
     let request = unwrapInboundIn(data)
     let response = Response(eventLoop: context.eventLoop)
 
-    router.unwind(request: request, response: response).whenSuccess {
-      context.write(self.wrapInboundOut(response), promise: nil)
+    router.unwind(request: request, response: response).whenComplete { result in
+      switch result {
+      case .success(_):
+        context.write(self.wrapInboundOut(response), promise: nil)
+
+      case .failure(let error):
+        print("Middleware Error: \(error.localizedDescription)")
+        context.write(self.wrapInboundOut(response), promise: nil)
+      }
     }
   }
 }

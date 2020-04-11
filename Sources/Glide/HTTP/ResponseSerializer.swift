@@ -46,7 +46,7 @@ class HTTPResponseSerializer: ChannelOutboundHandler {
   private func writeBody(
     on context: ChannelHandlerContext,
     body: Response.Body
-  ) -> EventLoopFuture<Void> {
+  ) -> Future<Void> {
     var byteBuffer: ByteBuffer
 
     switch body {

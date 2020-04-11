@@ -87,7 +87,7 @@ final class ErrorHandlerTests: GlideTests {
       }
 
       app.use { _, response in
-        return response.successFuture(.send("Success"))
+        return response.send("Success")
       }
 
       let request = try HTTPClient.Request(

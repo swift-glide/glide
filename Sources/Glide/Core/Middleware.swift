@@ -23,10 +23,10 @@ public enum MiddlewareOutput {
   }
 }
 
-public typealias Handler = () -> EventLoopFuture<Void>
-public typealias Middleware = (Request, Response) throws -> EventLoopFuture<MiddlewareOutput>
-public typealias HTTPHandler = (Request, Response) throws -> EventLoopFuture<Void>
-public typealias ErrorHandler = ([Error], Request, Response) -> EventLoopFuture<Void>
+public typealias Handler = () -> Future<Void>
+public typealias Middleware = (Request, Response) throws -> Future<MiddlewareOutput>
+public typealias HTTPHandler = (Request, Response) throws -> Future<Void>
+public typealias ErrorHandler = ([Error], Request, Response) -> Future<Void>
 
 public func passthrough(_ perform: @escaping HTTPHandler) -> Middleware {
   return { request, response in
@@ -84,7 +84,7 @@ public func staticFileHandler(_
 
   return Router.middleware(.GET, with: path) { request, response in
     let filePath = request.pathParameters.wildcards.joined(separator: "/")
-    return response.successFuture(.file("\(assetPath)/\(filePath)"))
+    return response.file("\(assetPath)/\(filePath)")
   }
 }
 
@@ -97,9 +97,9 @@ public func corsHandler(allowOrigin origin: String) -> Middleware {
 
     if request.header.method == .OPTIONS {
       response["Allow"] = "POST, GET, OPTIONS"
-      return response.successFuture(.send(""))
+      return response.send("")
     } else {
-      return response.successFuture(.next)
+      return request.next()
     }
   }
 }
