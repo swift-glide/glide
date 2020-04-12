@@ -38,14 +38,14 @@ public extension Response {
 }
 
 extension Response {
-  func with(_ text: String) -> Future<Void> {
+  func with(_ text: String, type: ContentType) -> Future<Void> {
+    setContentType(type)
     body = .string(text)
     return eventLoop.makeSucceededFuture(())
   }
 
-  func with(_ data: Data) -> Future<Void> {
-    // TODO: Get proper content type.
-    self["Content-Type"] = "application/json"
+  func with(_ data: Data, type: ContentType) -> Future<Void> {
+    setContentType(type)
     self["Content-Length"] = "\(data.count)"
     body = .data(data)
     return eventLoop.makeSucceededFuture(())
@@ -62,6 +62,10 @@ extension Response {
       print("Encoding Error:", error)
       return failure(error)
     }
+  }
+
+  func setContentType(_ type: ContentType) {
+    self["Content-Type"] = type.rawValue
   }
 }
 
@@ -81,6 +85,14 @@ public extension Response {
   func json<T: Encodable>(_ model: T) -> Future<MiddlewareOutput> {
     eventLoop.makeSucceededFuture(.json(model))
   }
+
+  func html(_ renderer: HTMLRendering) -> Future<MiddlewareOutput> {
+    renderer.render(eventLoop).flatMap {
+      print($0)
+      return self.eventLoop.makeSucceededFuture(.send($0, as: .html))
+    }
+  }
+
 
   func failure<T>(_ error: Error) -> Future<T> {
     eventLoop.makeFailedFuture(error)

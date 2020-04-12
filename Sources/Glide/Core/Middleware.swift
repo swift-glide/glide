@@ -7,11 +7,17 @@ import Glibc
 import Darwin.C
 #endif
 
+public enum ContentType: String {
+  case plainText = "text/plain; charset=utf-8"
+  case json = "application/json; charset=utf-8"
+  case html = "text/html; charset=utf-8"
+  case xml = "application/html; charset=utf-8"
+}
 
 public enum MiddlewareOutput {
   case next
-  case send(String)
-  case data(Data)
+  case send(String, as: ContentType = .plainText)
+  case data(Data, as: ContentType = .json)
   case file(String)
   
   public static func json<T: Encodable>(_ model: T) -> Self {
