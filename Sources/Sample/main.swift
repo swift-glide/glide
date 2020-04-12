@@ -86,17 +86,18 @@ app.post("/post") { request, response in
 
 struct HTML: HTMLRendering {
   func render(_ eventLoop: EventLoop) -> Future<String> {
-    return eventLoop.makeSucceededFuture("""
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>We're Live!</title>
-</head>
-<body>
-  Hello, world!
-</body>
-</html>
+    return eventLoop.makeSucceededFuture(
+      """
+      <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <title>We're Live!</title>
+        </head>
+        <body>
+          Hello, world!
+        </body>
+      </html>
       """
     )
   }
