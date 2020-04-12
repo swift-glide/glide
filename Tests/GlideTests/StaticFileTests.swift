@@ -49,4 +49,36 @@ final class StaticFileTests: GlideTests {
 
     wait(for: [expectation], timeout: 5)
   }
+
+  func testStaticFileMiddlewarePrecedence() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.use(
+        consoleLogger,
+        corsHandler(allowOrigin: "*"),
+        staticFileHandler(workingDirectory: testWorkingDirectory)
+      )
+
+      app.get("/ping") { _, response in
+        return response.send("pong")
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/ping",
+        method: .GET,
+        headers: .init()
+      )
+
+      let response = try client.execute(request: request).wait()
+
+      var buffer = response.body ?? ByteBufferAllocator().buffer(capacity: 0)
+      let responseContent = buffer.readString(length: buffer.readableBytes) ?? ""
+
+      XCTAssertEqual(responseContent, "pong")
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 5)
+  }
 }
