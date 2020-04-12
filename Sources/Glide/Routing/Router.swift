@@ -14,7 +14,7 @@ public class Router {
     request: Request,
     response: Response
   ) -> Future<Void> {
-    MiddlewareStack(
+    return MiddlewareStack(
       stack: middlewares[middlewares.indices],
       errorHandlers: errorHandlers[errorHandlers.indices],
       request: request,
@@ -173,8 +173,8 @@ extension Router {
             switch output {
             case .next:
               return self.pop()
-            case .send(let text):
-              return self.response.with(text)
+            case .send(let text, let type):
+              return self.response.with(text, type: type)
 
             case .file(let path):
               do {

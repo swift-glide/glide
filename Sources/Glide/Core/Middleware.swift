@@ -7,10 +7,16 @@ import Glibc
 import Darwin.C
 #endif
 
+public enum ContentType {
+  case plainText
+  case JSON
+  case HTML
+  case XML
+}
 
 public enum MiddlewareOutput {
   case next
-  case send(String)
+  case send(String, as: ContentType = .plainText)
   case data(Data)
   case file(String)
   
