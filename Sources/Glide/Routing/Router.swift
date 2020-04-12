@@ -186,8 +186,8 @@ extension Router {
               } catch {
                 return self.pop()
               }
-            case .data(let data):
-              return self.response.with(data)
+            case .data(let data, let type):
+              return self.response.with(data, type: type)
             }
           }
         } catch {
