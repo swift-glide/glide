@@ -177,11 +177,15 @@ extension Router {
               return self.response.with(text)
 
             case .file(let path):
-              return sendFile(
-                at: path,
-                response: self.response,
-                request: self.request
-              )
+              do {
+                return try sendFile(
+                  at: path,
+                  response: self.response,
+                  request: self.request
+                )
+              } catch {
+                return self.pop()
+              }
             case .data(let data):
               return self.response.with(data)
             }
@@ -216,14 +220,10 @@ fileprivate func sendFile(
   at path: String,
   response: Response,
   request: Request
-) -> Future<Void> {
-  do {
-    return try request.fileReader.readEntireFile(at: path)
-      .flatMap { buffer in
-        response.body = .buffer(buffer)
-        return request.successFuture
-    }
-  } catch {
-    return request.failureFuture(error)
+) throws -> Future<Void> {
+  try request.fileReader.readEntireFile(at: path)
+    .flatMap { buffer in
+      response.body = .buffer(buffer)
+      return request.successFuture
   }
 }
