@@ -88,7 +88,6 @@ public extension Response {
 
   func html(_ renderer: HTMLRendering) -> Future<MiddlewareOutput> {
     renderer.render(eventLoop).flatMap {
-      print($0)
       return self.eventLoop.makeSucceededFuture(.send($0, as: .html))
     }
   }
