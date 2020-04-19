@@ -30,6 +30,14 @@ extension Request {
       request: self
     )
   }
+
+  public var bodyData: Data? {
+    body?.data
+  }
+
+  public var bodyString: String? {
+    body?.string
+  }
 }
 
 public extension Request {
