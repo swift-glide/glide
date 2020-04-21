@@ -38,13 +38,13 @@ public extension Response {
 }
 
 extension Response {
-  func with(_ text: String, type: ContentType) -> Future<Void> {
+  func with(_ text: String, type: MIMEType) -> Future<Void> {
     setContentType(type)
     body = .string(text)
     return eventLoop.makeSucceededFuture(())
   }
 
-  func with(_ data: Data, type: ContentType) -> Future<Void> {
+  func with(_ data: Data, type: MIMEType) -> Future<Void> {
     setContentType(type)
     self["Content-Length"] = "\(data.count)"
     body = .data(data)
@@ -64,8 +64,8 @@ extension Response {
     }
   }
 
-  func setContentType(_ type: ContentType) {
-    self["Content-Type"] = type.rawValue
+  public func setContentType(_ type: MIMEType) {
+    self["Content-Type"] = type.description
   }
 }
 
