@@ -54,7 +54,19 @@ public extension Parameters {
 }
 
 extension Int: ParameterRepresentable {}
+extension UInt: ParameterRepresentable {}
 extension String: ParameterRepresentable {}
 extension Double: ParameterRepresentable {}
 extension Float: ParameterRepresentable {}
 extension Bool: ParameterRepresentable {}
+
+extension Array: ParameterRepresentable where Element: ParameterRepresentable {
+  public init?(_ string: String) {
+    self = string
+      .split(separator: ",")
+      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+      .compactMap {
+        Element($0)
+      }
+  }
+}
