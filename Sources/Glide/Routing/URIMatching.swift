@@ -49,9 +49,9 @@ public func match<T: URIMatching>(
   request: Request,
   matcher: T
 ) -> Bool {
-  guard request.header.method == method else { return false }
+  guard request.head.method == method else { return false }
 
-  let result = matcher.match(request.header.uri)
+  let result = matcher.match(request.head.uri)
 
   switch result {
   case .notMatching:

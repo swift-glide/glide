@@ -5,7 +5,7 @@ public func corsHandler(allowOrigin origin: String) -> Middleware {
     response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
     response["Access-Control-Max-Age"] = "86400"
 
-    if request.header.method == .OPTIONS {
+    if request.head.method == .OPTIONS {
       response["Allow"] = "POST, GET, OPTIONS"
       return response.send("")
     } else {

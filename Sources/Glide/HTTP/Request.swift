@@ -4,7 +4,7 @@ import NIO
 
 public final class Request {
   public let application: Application
-  public let header: HTTPRequestHead
+  public let head: HTTPRequestHead
   public var body: ByteBuffer? = nil
   public var pathParameters = Parameters()
   public var queryParameters = Parameters()
@@ -17,7 +17,7 @@ public final class Request {
     eventLoop: EventLoop
   ) {
     self.application = application
-    self.header = header
+    self.head = header
     self.eventLoop = eventLoop
   }
 }

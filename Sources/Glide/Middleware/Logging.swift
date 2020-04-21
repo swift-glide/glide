@@ -1,6 +1,6 @@
 public let consoleLogger = {
   passthrough { request, response in
-    print("\(request.header.method):", request.header.uri)
+    print("\(request.head.method):", request.head.uri)
   }
 }()
 
