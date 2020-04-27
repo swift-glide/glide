@@ -54,7 +54,17 @@ public extension Parameters {
 }
 
 extension Int: ParameterRepresentable {}
+extension Int8: ParameterRepresentable {}
+extension Int16: ParameterRepresentable {}
+extension Int32: ParameterRepresentable {}
+extension Int64: ParameterRepresentable {}
+
 extension UInt: ParameterRepresentable {}
+extension UInt8: ParameterRepresentable {}
+extension UInt16: ParameterRepresentable {}
+extension UInt32: ParameterRepresentable {}
+extension UInt64: ParameterRepresentable {}
+
 extension String: ParameterRepresentable {}
 extension Double: ParameterRepresentable {}
 extension Float: ParameterRepresentable {}
