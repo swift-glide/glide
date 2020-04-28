@@ -27,7 +27,7 @@ extension Request {
     return .init(
       fileIO: application.fileIO,
       allocator: application.allocator,
-      request: self
+      eventLoop: eventLoop
     )
   }
 
