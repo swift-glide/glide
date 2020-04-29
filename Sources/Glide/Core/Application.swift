@@ -8,7 +8,7 @@ public final class Application: Router {
 
   var allocator: ByteBufferAllocator = .init()
 
-  private let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+  let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
   private var serverChannel: Channel?
   private let threadPool = { () -> NIOThreadPool in
     let threadPool = NIOThreadPool(numberOfThreads: NonBlockingFileIO.defaultThreadPoolSize)
