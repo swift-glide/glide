@@ -54,7 +54,7 @@ public struct EnvironmentFile {
 
   public func setEnv(overwrite: Bool = false) {
     for key in storage.keys {
-      setenv(key, storage[key], overwrite ? 1 : 0)
+      setenv(key, storage[key]!, overwrite ? 1 : 0)
     }
   }
 }
