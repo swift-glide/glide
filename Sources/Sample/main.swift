@@ -40,6 +40,10 @@ enum CustomAbortError: AbortError {
 
 let app = Application()
 
+app.loadDotEnv()
+
+print(app.environment["THREE"] ?? "No .env file detected.")
+
 app.use(
   consoleLogger,
   corsHandler(allowOrigin: "*"),

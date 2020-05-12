@@ -12,7 +12,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-nio", from: "2.12.0"),
-    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0"),
+    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.1.0"),
   ],
   targets: [
     .target(
