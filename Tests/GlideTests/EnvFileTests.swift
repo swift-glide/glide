@@ -10,7 +10,7 @@ final class EnvFileTests: GlideTests {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
-      app.loadDotEnv()
+      app.loadDotEnv("env", workingDirectory: testWorkingDirectory)
       XCTAssertEqual(app.environment["THREE"], "baz")
       expectation.fulfill()
     }

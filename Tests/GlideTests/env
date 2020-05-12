@@ -1,0 +1,5 @@
+ONE=foo
+TWO=bar
+THREE=baz
+FOUR="thud"
+FIVE='xyzzy'
