@@ -42,7 +42,7 @@ let app = Application()
 
 app.loadDotEnv()
 
-print(app.environment["THREE"])
+print(app.environment["THREE"] ?? "No .env file detected.")
 
 app.use(
   consoleLogger,
