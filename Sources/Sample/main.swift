@@ -40,6 +40,10 @@ enum CustomAbortError: AbortError {
 
 let app = Application()
 
+app.loadDotEnv()
+
+print(app.environment["THREE"])
+
 app.use(
   consoleLogger,
   corsHandler(allowOrigin: "*"),
