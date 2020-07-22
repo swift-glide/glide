@@ -31,9 +31,11 @@ final class HTTPRequestSerializer: ChannelInboundHandler {
         eventLoop: context.eventLoop
       )
       requestState = .awaitingBodyPart(request)
+
     case let (.body(byteBuffer), .awaitingBodyPart(request)):
       request.body = byteBuffer
       requestState = .awaitingEnd(request)
+
     case let (.end, .awaitingBodyPart(request)),
          let (.end, .awaitingEnd(request)):
       context.fireChannelRead(wrapInboundOut(request))
