@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-  name: "Glide",
+  name: "glide",
   platforms: [
      .macOS(.v10_15)
   ],
