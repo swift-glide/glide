@@ -3,12 +3,13 @@ import NIO
 import NIOHTTP1
 
 public final class Application: Router {
+  // MARK: - Public
   public private(set) var didShutdown: Bool
   public private(set) var environment: Environment
+  public private(set) var loopGroupOwnership: EventLoopGroupOwnership
+  public private(set) var loopGroup: EventLoopGroup
 
-  var allocator: ByteBufferAllocator = .init()
-
-  let loopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+  // MARK: - Private
   private var serverChannel: Channel?
   private let threadPool = { () -> NIOThreadPool in
     let threadPool = NIOThreadPool(numberOfThreads: NonBlockingFileIO.defaultThreadPoolSize)
@@ -16,16 +17,30 @@ public final class Application: Router {
     return threadPool
   }()
 
-  public init(_ environment: Environment = .development) {
+  // MARK: - Internal
+  var allocator: ByteBufferAllocator = .init()
+
+  public init(
+    _ environment: Environment = .development,
+    _ loopGroupOwnership: EventLoopGroupOwnership = .exclusive
+  ) {
     self.didShutdown = false
     self.environment = environment
+    self.loopGroupOwnership = loopGroupOwnership
+
+    switch loopGroupOwnership {
+    case .shared(let group):
+      self.loopGroup = group
+    case .exclusive:
+      self.loopGroup = MultiThreadedEventLoopGroup(
+        numberOfThreads: System.coreCount
+      )
+    }
+
     super.init()
     configure()
   }
 
-  private func configure() {
-    use(parameterParser)
-  }
   public func listen(
     _ port: Int,
     _ host: String = "localhost",
@@ -66,6 +81,26 @@ public final class Application: Router {
     }
   }
 
+  public func shutdown() {
+    assert(!self.didShutdown, "Server has already shut down")
+    do {
+      try serverChannel?.close().wait()
+      if case .exclusive = loopGroupOwnership {
+        try loopGroup.syncShutdownGracefully()
+      }
+    } catch {
+      print("Error while shutting down:", error.localizedDescription)
+    }
+
+    self.didShutdown = true
+    print("Server shut down successfully.")
+  }
+
+// MARK: - Private Methods
+  private func configure() {
+    use(parameterParser)
+  }
+
   private func makeServerBootstrap(_ backlog: Int) -> ServerBootstrap {
     let localAddressReuseOption = ChannelOptions.socket(
       SocketOptionLevel(SOL_SOCKET),
@@ -92,18 +127,6 @@ public final class Application: Router {
 
   }
 
-  public func shutdown() {
-    assert(!self.didShutdown, "Server has already shut down")
-    do {
-      try serverChannel?.close().wait()
-      try loopGroup.syncShutdownGracefully()
-    } catch {
-      print("Error while shutting down:", error.localizedDescription)
-    }
-
-    self.didShutdown = true
-    print("Server shut down successfully.")
-  }
 
   deinit {
     if !self.didShutdown {
@@ -112,8 +135,13 @@ public final class Application: Router {
   }
 }
 
-extension Application {
-  public var fileIO: NonBlockingFileIO {
+public extension Application {
+  public enum EventLoopGroupOwnership {
+      case shared(EventLoopGroup)
+      case exclusive
+  }
+
+  var fileIO: NonBlockingFileIO {
     .init(threadPool: self.threadPool)
   }
 }
