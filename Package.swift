@@ -11,7 +11,7 @@ let package = Package(
     .executable(name: "sample", targets: ["Sample"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-nio", from: "2.19.0"),
+    .package(url: "https://github.com/apple/swift-nio.git", from: "2.19.0"),
     .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.1.0"),
   ],
   targets: [
