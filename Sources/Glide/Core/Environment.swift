@@ -4,6 +4,7 @@ import Glibc
 import Darwin
 #endif
 
+@dynamicMemberLookup
 public enum Environment: Equatable {
   case development
   case testing
@@ -11,6 +12,11 @@ public enum Environment: Equatable {
   case custom(String)
 
   public subscript(_ key: String) -> String? {
+    ProcessInfo.processInfo.environment[key]
+  }
+
+  public subscript(dynamicMember member: String) -> String? {
+    let key = member.snakeCased(screaming: true)
     return ProcessInfo.processInfo.environment[key]
   }
 }
@@ -74,7 +80,10 @@ public extension Application {
     } catch {
       print(error.localizedDescription)
     }
+  }
 
+  var env: Environment {
+    environment
   }
 }
 

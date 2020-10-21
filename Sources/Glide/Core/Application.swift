@@ -136,7 +136,7 @@ public final class Application: Router {
 }
 
 public extension Application {
-  public enum EventLoopGroupOwnership {
+  enum EventLoopGroupOwnership {
       case shared(EventLoopGroup)
       case exclusive
   }
