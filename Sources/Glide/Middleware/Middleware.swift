@@ -3,7 +3,7 @@ import NIO
 
 public enum MiddlewareOutput {
   case next
-  case send(String, as: MIMEType = .plainText)
+  case text(String, as: MIMEType = .plainText)
   case data(Data, as: MIMEType = .json)
   case file(String)
 

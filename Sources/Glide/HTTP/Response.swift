@@ -71,7 +71,7 @@ extension Response {
 
 public extension Response {
   func send(_ text: String) -> Future<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(.send(text))
+    eventLoop.makeSucceededFuture(.text(text))
   }
 
   func send(_ data: Data) -> Future<MiddlewareOutput> {
@@ -88,7 +88,7 @@ public extension Response {
 
   func html(_ renderer: HTMLRendering) -> Future<MiddlewareOutput> {
     renderer.render(eventLoop).flatMap {
-      return self.eventLoop.makeSucceededFuture(.send($0, as: .html))
+      return self.eventLoop.makeSucceededFuture(.text($0, as: .html))
     }
   }
 

@@ -44,7 +44,7 @@ let app = Application()
 
 // 3. Add a route.
 app.get("/hello") { _, response in
-  response.send("Hello, world!")
+  response.text("Hello, world!")
 }
 
 // 4. Start listening on a given port
@@ -86,7 +86,7 @@ typealias Middleware = (Request, Response) throws -> EventLoopFuture<MiddlewareO
 
 enum MiddlewareOutput {
   case next
-  case send(String)
+  case text(String)
   case data(Data)
   case file(String)
   

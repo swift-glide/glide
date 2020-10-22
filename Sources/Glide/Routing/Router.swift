@@ -173,7 +173,7 @@ extension Router {
             switch output {
             case .next:
               return self.pop()
-            case .send(let text, let type):
+            case .text(let text, let type):
               return self.response.with(text, type: type)
 
             case .file(let path):
