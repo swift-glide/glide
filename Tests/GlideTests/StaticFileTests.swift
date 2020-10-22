@@ -27,7 +27,7 @@ final class StaticFileTests: GlideTests {
         staticFileHandler(workingDirectory: testWorkingDirectory)
       )
 
-      app.use(errorLogger, { errors, request, _ in
+      app.catch(errorLogger, { errors, request, _ in
         print(errors.count, "error(s) encountered.")
         return request.successFuture
       })

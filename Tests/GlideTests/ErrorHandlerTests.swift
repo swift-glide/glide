@@ -46,9 +46,8 @@ final class ErrorHandlerTests: GlideTests {
         throw CustomError.someError
       }
 
-      app.handleErrors { errors, request, _ in
+      app.catch { errors, request, _ in
         caughtError = errors.first as? CustomError
-        return request.successFuture
       }
 
       let request = try HTTPClient.Request(

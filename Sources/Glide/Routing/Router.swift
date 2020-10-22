@@ -26,12 +26,15 @@ public class Router {
 
 // MARK: - Error Handling
 extension Router {
-  public func use(_ errorHandler: ErrorHandler...) {
-    self.errorHandlers.append(contentsOf: errorHandler)
+  public func `catch`(_ errorHandlers: ErrorHandler...) {
+    self.errorHandlers.append(contentsOf: errorHandlers)
   }
 
-  public func handleErrors(_ errorHandler: ErrorHandler...) {
-    self.errorHandlers.append(contentsOf: errorHandler)
+  public func `catch`(_ handler: @escaping SyncErrorHandler) {
+    self.errorHandlers.append({ errors, request, response in
+      handler(errors, request, response)
+      return request.successFuture
+    })
   }
 }
 
