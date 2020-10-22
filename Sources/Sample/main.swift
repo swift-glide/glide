@@ -50,7 +50,7 @@ app.use(
   staticFileHandler()
 )
 
-app.use(errorLogger, { errors, request, _ in
+app.catch(errorLogger, { errors, request, _ in
   print(errors.count, "error(s) encountered.")
   return request.successFuture
 })
@@ -64,7 +64,7 @@ app.get("/abort") { _, _ in
 }
 
 app.get("/hello/\("name")") { request, response in
-  response.text("Hello, \(request.pathParameters.name ?? "world")!")
+  response.send("Hello, \(request.pathParameters.name ?? "world")!")
 }
 
 app.get("/users/\("id", as: Int.self)") { request, response in
@@ -82,7 +82,7 @@ app.post("/post") { request, response in
 
   do {
     let user = try JSONDecoder().decode(User.self, from: data)
-    return response.text("\(user.name)")
+    return response.send("\(user.name)")
   } catch let error as DecodingError {
     throw error
   }
