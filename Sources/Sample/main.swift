@@ -8,22 +8,26 @@ struct User: Codable {
   var password: String = "password"
 }
 
-enum CustomError: Error {
+enum CustomError: LocalizedError {
   case missingUser
   case nonCriticalError
 
-  var localizedDescription: String {
+  var errorDescription: String? {
     switch self {
     case .missingUser:
-      return "The user seems to be missing"
+      return "The user seems to be missing."
     default:
-      return "Unknown error"
+      return "Unknown error."
     }
   }
 }
 
 enum CustomAbortError: AbortError {
   case badCredentials
+
+  public var code: Int {
+    return 1224
+  }
 
   var status: HTTPResponseStatus {
     return .badRequest
@@ -47,7 +51,7 @@ print(app.environment["THREE"] ?? "No .env file detected.")
 app.use(
   consoleLogger,
   corsHandler(allowOrigin: "*"),
-  staticFileHandler()
+  staticFileHandler(path: "/static/\(wildcard: .all)")
 )
 
 app.catch(errorLogger, { errors, request, _ in
@@ -55,19 +59,19 @@ app.catch(errorLogger, { errors, request, _ in
   return request.success
 })
 
-app.get("/throw") { _, _ in
+app.get("/throw-sync") { _, _ in
   throw CustomError.nonCriticalError
 }
 
-app.get("/throw-2") { request, response in
+app.get("/throw-async") { request, response in
   request.failure(CustomError.nonCriticalError)
 }
 
-app.get("/abort") { _, _ in
+app.get("/abort-sync") { _, _ in
   throw CustomAbortError.badCredentials
 }
 
-app.get("/abort-2") { request, response in
+app.get("/abort-async") { request, response in
   request.failure(CustomAbortError.badCredentials)
 }
 

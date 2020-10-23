@@ -5,9 +5,21 @@ public let consoleLogger = {
 }()
 
 public let errorLogger: ErrorHandler = { errors, request, response in
-  errors.forEach {
-    print("Error:", $0.localizedDescription)
+  errors.forEach { error in
+    let errorResponse = Router.ErrorResponse.from(error)
+
+    let code = { () -> String in
+      if let code = errorResponse.code {
+        return " (\(code))"
+      } else {
+        return ""
+      }
+    }()
+
+    print("Error\(code):", errorResponse.error)
   }
 
   return request.success
 }
+
+

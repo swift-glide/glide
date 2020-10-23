@@ -6,6 +6,10 @@ extension DecodingError: AbortError {
     return .badRequest
   }
 
+  public var code: Int {
+    return 8997
+  }
+
   public var identifier: String {
     switch self {
     case .dataCorrupted: return "dataCorrupted"

@@ -34,7 +34,7 @@ public struct FileReader {
     let attributes = try FileManager.default.attributesOfItem(atPath: path)
 
     guard let fileSize = attributes[.size] as? NSNumber else {
-        return eventLoop.makeFailedFuture(InternalError.assetNotFound)
+        return eventLoop.makeFailedFuture(GlideError.assetNotFound)
      }
 
     return readChunked(

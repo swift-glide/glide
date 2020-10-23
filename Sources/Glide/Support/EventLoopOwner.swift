@@ -1,4 +1,5 @@
 import Foundation
+import NIO
 
 public protocol EventLoopOwner {
   var eventLoop: EventLoop { get }
@@ -21,3 +22,5 @@ public extension EventLoopOwner {
     eventLoop.makeFailedFuture(error)
   }
 }
+
+extension ChannelHandlerContext: EventLoopOwner {}
