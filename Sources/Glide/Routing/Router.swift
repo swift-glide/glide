@@ -105,7 +105,7 @@ extension Router {
   // MARK: Put
   public func put<T: URIMatching>(
     _ uriMatcher: T,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(.PUT, with: uriMatcher, and: middleware)
@@ -124,7 +124,7 @@ extension Router {
   // MARK: Patch
   public func patch<T: URIMatching>(
     _ uriMatcher: T,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(.PATCH, with: uriMatcher, and: middleware)
@@ -133,7 +133,7 @@ extension Router {
 
   public func patch(
     _ expression: PathExpression,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(.PATCH, with: expression, and: middleware)
@@ -149,7 +149,7 @@ extension Router {
 
   public func delete(
     _ expression: PathExpression,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(.DELETE, with: expression, and: middleware)
