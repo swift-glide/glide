@@ -7,12 +7,9 @@ public enum MiddlewareOutput {
   case data(Data, as: MIMEType = .json)
   case file(String)
 
-  public static func json<T: Encodable>(_ model: T) -> Self {
-    if let data = try? JSONEncoder().encode(model) {
-      return .data(data)
-    } else {
-      return .next
-    }
+  public static func json<T: Encodable>(_ model: T) throws -> Self {
+    let data = try JSONEncoder().encode(model)
+    return .data(data)
   }
 }
 

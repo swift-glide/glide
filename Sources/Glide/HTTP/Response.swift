@@ -82,7 +82,12 @@ public extension Response {
   }
 
   func json<T: Encodable>(_ model: T) -> Future<MiddlewareOutput> {
-    success(.json(model))
+    do {
+      let output = try MiddlewareOutput.json(model)
+      return success(output)
+    } catch {
+      return failure(error)
+    }
   }
 
   func html(_ renderer: HTMLRendering) -> Future<MiddlewareOutput> {
