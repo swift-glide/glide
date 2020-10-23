@@ -3,7 +3,7 @@ import Foundation
 let mainErrorHandler: ErrorHandler = { errors, request, response in
   guard let error = errors.first else {
     assertionFailure("No errors were passed to the main error handler.")
-    return request.successFuture
+    return request.success
   }
 
   let errorDescription: String

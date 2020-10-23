@@ -19,6 +19,6 @@ public enum MiddlewareOutput {
 public func passthrough(_ perform: @escaping ThrowingSyncHTTPHandler) -> Middleware {
   return { request, response in
     try perform(request, response)
-    return request.next()
+    return request.next
   }
 }

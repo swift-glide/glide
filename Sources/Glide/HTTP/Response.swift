@@ -3,7 +3,7 @@ import NIOHTTP1
 import struct Foundation.Data
 import class Foundation.JSONEncoder
 
-public class Response {
+public class Response: EventLoopOwner {
   public var status = HTTPResponseStatus.ok
   public var headers = HTTPHeaders()
   public var body = Body.empty
@@ -57,7 +57,7 @@ extension Response {
     do {
       data = try JSONEncoder().encode(model)
       body = .data(data)
-    return eventLoop.makeSucceededFuture(())
+      return eventLoop.makeSucceededFuture(())
     } catch {
       print("Encoding Error:", error)
       return failure(error)
