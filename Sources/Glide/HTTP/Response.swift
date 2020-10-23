@@ -92,8 +92,16 @@ public extension Response {
     }
   }
 
-
-  func failure<T>(_ error: Error) -> Future<T> {
-    eventLoop.makeFailedFuture(error)
+  var middlewareOutput: Future<MiddlewareOutput> {
+    switch body {
+    case .string(let text):
+      return send(text)
+    case .buffer(let byteBuffer):
+      return send(byteBuffer.data)
+    case .data(let data):
+      return send(data)
+    default:
+      return success(.text(""))
+    }
   }
 }

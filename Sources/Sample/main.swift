@@ -59,8 +59,16 @@ app.get("/throw") { _, _ in
   throw CustomError.nonCriticalError
 }
 
+app.get("/throw-2") { request, response in
+  request.failure(CustomError.nonCriticalError)
+}
+
 app.get("/abort") { _, _ in
   throw CustomAbortError.badCredentials
+}
+
+app.get("/abort-2") { request, response in
+  request.failure(CustomAbortError.badCredentials)
 }
 
 app.get("/hello/\("name")") { request, response in
