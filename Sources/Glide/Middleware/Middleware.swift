@@ -16,7 +16,7 @@ public enum MiddlewareOutput {
   }
 }
 
-public func passthrough(_ perform: @escaping ThrowingSyncHTTPHandler) -> Middleware {
+public func passthrough(_ perform: @escaping ThrowingSyncHTTPHandler) -> ThrowingMiddleware {
   return { request, response in
     try perform(request, response)
     return request.next

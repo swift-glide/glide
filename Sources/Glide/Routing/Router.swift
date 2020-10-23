@@ -6,8 +6,8 @@ public class Router {
   private var middlewares = [Middleware]()
   private var errorHandlers = [ErrorHandler]()
 
-  public func use(_ middleware: Middleware...) {
-    self.middlewares.append(contentsOf: middleware)
+  public func use(_ middleware: ThrowingMiddleware...) {
+    self.middlewares.append(contentsOf: middleware.map(nonThrowing))
   }
 
   func unwind(
@@ -43,7 +43,7 @@ extension Router {
   public func route<T: URIMatching>(
     _ method: HTTPMethod = .GET,
     _ uriMatcher: T,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
      use(
        Router.middleware(method, with: uriMatcher, and: middleware)
@@ -53,7 +53,7 @@ extension Router {
    public func route(
     _ method: HTTPMethod = .GET,
     _ expression: PathExpression,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
    ) {
      use(
        Router.middleware(
@@ -67,7 +67,7 @@ extension Router {
   // MARK: Get
   public func get<T: URIMatching>(
     _ uriMatcher: T,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(with: uriMatcher, and: middleware)
@@ -76,7 +76,7 @@ extension Router {
 
   public func get(
     _ expression: PathExpression,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(with: expression, and: middleware)
@@ -84,7 +84,10 @@ extension Router {
   }
 
   // MARK: Post
-  public func post<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
+  public func post<T: URIMatching>(
+    _ uriMatcher: T,
+    middleware: @escaping ThrowingMiddleware
+  ) {
     use(
       Router.middleware(.POST, with: uriMatcher, and: middleware)
     )
@@ -92,7 +95,7 @@ extension Router {
 
   public func post(
     _ expression: PathExpression,
-    middleware: @escaping Middleware
+    middleware: @escaping ThrowingMiddleware
   ) {
     use(
       Router.middleware(.POST, with: expression, and: middleware)
@@ -109,7 +112,10 @@ extension Router {
     )
   }
 
-  public func put(_ expression: PathExpression, middleware: @escaping Middleware) {
+  public func put(
+    _ expression: PathExpression, 
+    middleware: @escaping ThrowingMiddleware
+  ) {
     use(
       Router.middleware(.PUT, with: expression, and: middleware)
     )
@@ -154,14 +160,14 @@ extension Router {
   static func middleware<T: URIMatching>(
     _ method: HTTPMethod = .GET,
     with matcher: T,
-    and middleware: @escaping Middleware
+    and middleware: @escaping ThrowingMiddleware
   ) -> Middleware {
     { request, response in
       guard match(method, request: request, matcher: matcher) else {
         return request.next
       }
 
-      return try middleware(request, response)
+      return nonThrowing(middleware)(request, response)
     }
   }
 }
