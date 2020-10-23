@@ -71,6 +71,10 @@ final class ErrorHandlerTests: GlideTests {
       case someError
       static let customReason = "Something went wrong"
 
+      public var code: Int {
+        return 999
+      }
+
       var status: HTTPResponseStatus {
         .notFound
       }

@@ -41,14 +41,14 @@ extension Response {
   func with(_ text: String, type: MIMEType) -> Future<Void> {
     setContentType(type)
     body = .string(text)
-    return eventLoop.makeSucceededFuture(())
+    return success
   }
 
   func with(_ data: Data, type: MIMEType) -> Future<Void> {
     setContentType(type)
     self["Content-Length"] = "\(data.count)"
     body = .data(data)
-    return eventLoop.makeSucceededFuture(())
+    return success
   }
 
   func with<T: Encodable>(_ model: T) -> Future<Void> {
@@ -57,9 +57,8 @@ extension Response {
     do {
       data = try JSONEncoder().encode(model)
       body = .data(data)
-      return eventLoop.makeSucceededFuture(())
+      return success
     } catch {
-      print("Encoding Error:", error)
       return failure(error)
     }
   }
@@ -71,28 +70,28 @@ extension Response {
 
 public extension Response {
   func send(_ text: String) -> Future<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(.text(text))
+    success(.text(text))
   }
 
   func send(_ data: Data) -> Future<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(.data(data))
+    success(.data(data))
   }
 
   func file(_ path: String) -> Future<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(.file(path))
+    success(.file(path))
   }
 
   func json<T: Encodable>(_ model: T) -> Future<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(.json(model))
+    success(.json(model))
   }
 
   func html(_ renderer: HTMLRendering) -> Future<MiddlewareOutput> {
     renderer.render(eventLoop).flatMap {
-      return self.eventLoop.makeSucceededFuture(.text($0, as: .html))
+      return self.success(.text($0, as: .html))
     }
   }
 
-  var middlewareOutput: Future<MiddlewareOutput> {
+  func toOutput() -> Future<MiddlewareOutput> {
     switch body {
     case .string(let text):
       return send(text)

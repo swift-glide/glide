@@ -1,7 +1,7 @@
 import Foundation
 import NIOHTTP1
 
-enum InternalError: LocalizedError, CustomStringConvertible {
+enum GlideError: LocalizedError, CustomStringConvertible {
   case unhandledRoute
   case assetNotFound
   case unknown
@@ -34,5 +34,9 @@ enum InternalError: LocalizedError, CustomStringConvertible {
     case .unknown:
       return "An internal server error has occured."
     }
+  }
+
+  var localizedDescription: String {
+    reason
   }
 }

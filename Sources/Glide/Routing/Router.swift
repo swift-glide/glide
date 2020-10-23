@@ -56,18 +56,28 @@ extension Router {
     middleware: @escaping Middleware
    ) {
      use(
-       Router.middleware(method, with: expression, and: middleware)
+       Router.middleware(
+        method,
+        with: expression,
+        and: middleware
+       )
      )
    }
 
   // MARK: Get
-  public func get<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
+  public func get<T: URIMatching>(
+    _ uriMatcher: T,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(with: uriMatcher, and: middleware)
     )
   }
 
-  public func get(_ expression: PathExpression, middleware: @escaping Middleware) {
+  public func get(
+    _ expression: PathExpression,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(with: expression, and: middleware)
     )
@@ -80,14 +90,20 @@ extension Router {
     )
   }
 
-  public func post(_ expression: PathExpression, middleware: @escaping Middleware) {
+  public func post(
+    _ expression: PathExpression,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(.POST, with: expression, and: middleware)
     )
   }
 
   // MARK: Put
-  public func put<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
+  public func put<T: URIMatching>(
+    _ uriMatcher: T,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(.PUT, with: uriMatcher, and: middleware)
     )
@@ -100,13 +116,19 @@ extension Router {
   }
 
   // MARK: Patch
-  public func patch<T: URIMatching>(_ uriMatcher: T, middleware: @escaping Middleware) {
+  public func patch<T: URIMatching>(
+    _ uriMatcher: T,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(.PATCH, with: uriMatcher, and: middleware)
     )
   }
 
-  public func patch(_ expression: PathExpression, middleware: @escaping Middleware) {
+  public func patch(
+    _ expression: PathExpression,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(.PATCH, with: expression, and: middleware)
     )
@@ -119,7 +141,10 @@ extension Router {
     )
   }
 
-  public func delete(_ expression: PathExpression, middleware: @escaping Middleware) {
+  public func delete(
+    _ expression: PathExpression,
+    middleware: @escaping Middleware
+  ) {
     use(
       Router.middleware(.DELETE, with: expression, and: middleware)
     )
@@ -145,10 +170,14 @@ func sendFile(
   at path: String,
   response: Response,
   request: Request
-) throws -> Future<Void> {
-  try request.fileReader.readEntireFile(at: path)
-    .flatMap { buffer in
-      response.body = .buffer(buffer)
-      return request.success
+) -> Future<Void> {
+  do {
+    return try request.fileReader.readEntireFile(at: path)
+      .flatMap { buffer in
+        response.body = .buffer(buffer)
+        return response.success
+      }
+  } catch {
+    return response.failure(error)
   }
 }

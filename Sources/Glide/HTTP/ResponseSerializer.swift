@@ -59,7 +59,7 @@ class HTTPResponseSerializer: ChannelOutboundHandler {
       byteBuffer = context.channel.allocator.buffer(capacity: data.count)
       byteBuffer.writeBytes(data)
     case .empty:
-      return context.eventLoop.makeSucceededFuture(())
+      return context.success
     }
 
     return context.writeAndFlush(
