@@ -29,7 +29,7 @@ final class StaticFileTests: GlideTests {
 
       app.catch(errorLogger, { errors, request, _ in
         print(errors.count, "error(s) encountered.")
-        return request.successFuture
+        return request.success
       })
 
       let request = try HTTPClient.Request(

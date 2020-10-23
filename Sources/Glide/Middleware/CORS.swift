@@ -9,7 +9,7 @@ public func corsHandler(allowOrigin origin: String) -> Middleware {
       response["Allow"] = "POST, GET, OPTIONS"
       return response.send("")
     } else {
-      return request.next()
+      return request.next
     }
   }
 }

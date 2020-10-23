@@ -2,7 +2,7 @@ import NIOHTTP1
 import Foundation
 import NIO
 
-public final class Request {
+public final class Request: EventLoopOwner {
   public let application: Application
   public let head: HTTPRequestHead
   public var body: ByteBuffer? = nil
@@ -39,22 +39,3 @@ extension Request {
     body?.string
   }
 }
-
-public extension Request {
-  func next() -> Future<MiddlewareOutput> {
-    eventLoop.makeSucceededFuture(.next)
-  }
-
-  var successFuture: Future<Void> {
-    eventLoop.makeSucceededFuture(())
-  }
-
-  func successFuture<T>(_ value: T) -> Future<T> {
-    eventLoop.makeSucceededFuture(value)
-  }
-
-  func failureFuture<T>(_ error: Error) -> Future<T> {
-    eventLoop.makeFailedFuture(error)
-  }
-}
-

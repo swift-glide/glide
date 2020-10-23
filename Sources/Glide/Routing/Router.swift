@@ -33,7 +33,7 @@ extension Router {
   public func `catch`(_ handler: @escaping SyncErrorHandler) {
     self.errorHandlers.append({ errors, request, response in
       handler(errors, request, response)
-      return request.successFuture
+      return request.success
     })
   }
 }
@@ -133,7 +133,7 @@ extension Router {
   ) -> Middleware {
     { request, response in
       guard match(method, request: request, matcher: matcher) else {
-        return request.next()
+        return request.next
       }
 
       return try middleware(request, response)
@@ -227,6 +227,6 @@ fileprivate func sendFile(
   try request.fileReader.readEntireFile(at: path)
     .flatMap { buffer in
       response.body = .buffer(buffer)
-      return request.successFuture
+      return request.success
   }
 }

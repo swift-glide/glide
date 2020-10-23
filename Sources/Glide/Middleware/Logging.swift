@@ -9,5 +9,5 @@ public let errorLogger: ErrorHandler = { errors, request, response in
     print("Error:", $0.localizedDescription)
   }
 
-  return request.successFuture
+  return request.success
 }
