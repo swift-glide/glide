@@ -51,6 +51,30 @@ public extension Parameters {
 
     return mergedParameters
   }
+
+  func string(_ index: String) -> String? {
+    self[index] as? String
+  }
+
+  func int(_ index: String) -> Int? {
+    self[index]?.as(Int.self)
+  }
+
+  func float(_ index: String) -> Float? {
+    self[index]?.as(Float.self)
+  }
+
+  func double(_ index: String) -> Double? {
+    self[index]?.as(Double.self)
+  }
+
+  func bool(_ index: String) -> Bool {
+    self[index]?.as(Bool.self) ?? false
+  }
+
+  func contains(_ index: String) -> Bool {
+    self[index] != nil
+  }
 }
 
 extension Int: ParameterRepresentable {}

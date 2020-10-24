@@ -13,6 +13,7 @@ final class ParameterMatchingTests: GlideTests {
       app.get("/query") { request, response in
 
         XCTAssertEqual(request.queryParameters["foo"]?.as(String.self), "bar")
+        XCTAssertEqual(request.queryParameters.string("foo"), "bar")
         XCTAssertEqual(request.queryParameters.baz, "qux")
         expectation.fulfill()
 
@@ -38,15 +39,21 @@ final class ParameterMatchingTests: GlideTests {
       app.get("/query") { request, response in
         XCTAssertEqual(request.queryParameters["foo"]?.as(Int.self), 12)
         XCTAssertEqual(request.queryParameters.foo, 12)
+        XCTAssertEqual(request.queryParameters.int("foo"), 12)
 
         XCTAssertEqual(request.queryParameters["bar"]?.as(Double.self), 10.9)
         XCTAssertEqual(request.queryParameters.bar, 10.9)
+        XCTAssertEqual(request.queryParameters.double("bar"), 10.9)
 
         XCTAssertEqual(request.queryParameters["baz"]?.as(Float.self), Float(10))
         XCTAssertEqual(request.queryParameters.baz, Float(10))
+        XCTAssertEqual(request.queryParameters.float("baz"), Float(10))
 
         XCTAssertNotNil(request.queryParameters["qux"])
+        XCTAssertEqual(request.queryParameters.contains("qux"), true)
+        XCTAssertEqual(request.queryParameters.bool("fox"), false)
         XCTAssertEqual(request.queryParameters.thud, true)
+        XCTAssertEqual(request.queryParameters.bool("thud"), true)
 
         expectation.fulfill()
 
