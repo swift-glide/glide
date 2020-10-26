@@ -12,6 +12,10 @@ extension AbortError {
     reason
   }
 
+  public var failureReason: String? {
+    reason
+  }
+
   public var localizedDescription: String {
     reason
   }
