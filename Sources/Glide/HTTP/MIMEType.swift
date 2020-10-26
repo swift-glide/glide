@@ -100,4 +100,5 @@ public extension MIMEType {
   static var css = MIMEType(.text, subtype: "css", parameter: ("charset", "utf-8"))
   static var xml = MIMEType(.application, subtype: "xml", parameter: ("charset", "utf-8"))
   static var formURLEncoded = MIMEType(.application, subtype: "x-www-form-urlencoded", parameter: ("charset", "utf-8"))
+  static var multipart = MIMEType(.multipart, subtype: "form-data")
 }
