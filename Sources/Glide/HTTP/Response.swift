@@ -38,13 +38,13 @@ public extension Response {
 }
 
 extension Response {
-  func with(_ text: String, type: MIMEType) -> Future<Void> {
+  func with(_ text: String, as type: MIMEType) -> Future<Void> {
     setContentType(type)
     body = .string(text)
     return success
   }
 
-  func with(_ data: Data, type: MIMEType) -> Future<Void> {
+  func with(_ data: Data, as type: MIMEType) -> Future<Void> {
     setContentType(type)
     self["Content-Length"] = "\(data.count)"
     body = .data(data)
@@ -69,8 +69,8 @@ extension Response {
 }
 
 public extension Response {
-  func send(_ text: String) -> Future<MiddlewareOutput> {
-    success(.text(text))
+  func send(_ text: String, as type: MIMEType = .plainText) -> Future<MiddlewareOutput> {
+    success(.text(text, as: type))
   }
 
   func send(_ data: Data) -> Future<MiddlewareOutput> {

@@ -27,7 +27,7 @@ extension Router {
               return self.pop()
 
             case .text(let text, let type):
-              return self.response.with(text, type: type)
+              return self.response.with(text, as: type)
 
             case .file(let path):
               return sendFile(
@@ -37,7 +37,7 @@ extension Router {
               )
 
             case .data(let data, let type):
-              return self.response.with(data, type: type)
+              return self.response.with(data, as: type)
             }
           }
           .flatMapError { error in
