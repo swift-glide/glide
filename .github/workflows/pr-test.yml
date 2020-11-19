@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     container: 
-      image: vapor/swift:5.2-bionic
+      image: swiftlang/swift:nightly-5.3-bionic
     runs-on: ubuntu-latest
 
     steps:
@@ -17,4 +17,4 @@ jobs:
     - name: Run tests
       run: swift test --enable-test-discovery --enable-code-coverage --sanitize=thread
     - name: Code Coverage
-      uses: mattpolzin/swift-codecov-action@0.3.0
+      uses: mattpolzin/swift-codecov-action@0.5.0
