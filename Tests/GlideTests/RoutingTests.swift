@@ -6,6 +6,34 @@ import XCTest
 @testable import Glide
 
 final class PathMatchingTests: GlideTests {
+
+  func testRootPath() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get("/") { request, response in
+        return response.send("success")
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/",
+        method: .GET,
+        headers: .init()
+      )
+
+      let response = try client.execute(request: request).wait()
+      guard let responseContent = response.body?.string else {
+        throw XCTestError(.failureWhileWaiting, userInfo: [:])
+      }
+
+      XCTAssertEqual(responseContent, "success")
+
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 5)
+  }
+
   func testPathMatching() throws {
     let expectation = XCTestExpectation()
 

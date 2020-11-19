@@ -51,7 +51,7 @@ final class JSONTests: GlideTests {
     wait(for: [expectation], timeout: 5)
   }
 
-  func testCustomDecoder() throws {
+  func testCustomEncoder() throws {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
@@ -81,9 +81,11 @@ final class JSONTests: GlideTests {
 
       expectation.fulfill()
     }
+
+    wait(for: [expectation], timeout: 5)
   }
 
-  func testCustomDecoderFailure() throws {
+  func testCustomEncoderFailure() throws {
     let expectation = XCTestExpectation()
 
     performHTTPTest { app, client in
@@ -107,5 +109,7 @@ final class JSONTests: GlideTests {
 
       expectation.fulfill()
     }
+
+    wait(for: [expectation], timeout: 5)
   }
 }
