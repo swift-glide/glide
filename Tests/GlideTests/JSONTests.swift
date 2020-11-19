@@ -50,4 +50,62 @@ final class JSONTests: GlideTests {
 
     wait(for: [expectation], timeout: 5)
   }
+
+  func testCustomDecoder() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get("/") { request, response in
+        let date = Date(timeIntervalSince1970: 1605830400)
+        let encoder: JSONEncoder = {
+          let encoder = JSONEncoder()
+          encoder.dateEncodingStrategy = .secondsSince1970
+          return encoder
+        }()
+
+        return response.json(date, using: encoder)
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/",
+        method: .GET,
+        headers: .init()
+      )
+
+      let response = try client.execute(request: request).wait()
+      guard let responseContent = response.body?.string else {
+        throw XCTestError(.failureWhileWaiting, userInfo: [:])
+      }
+
+      XCTAssertEqual(responseContent, "1605830400")
+
+      expectation.fulfill()
+    }
+  }
+
+  func testCustomDecoderFailure() throws {
+    let expectation = XCTestExpectation()
+
+    performHTTPTest { app, client in
+      app.get("/") { request, response in
+        let date = Date(timeIntervalSince1970: 1605830400)
+        return response.json(date)
+      }
+
+      let request = try HTTPClient.Request(
+        url: "http://localhost:\(testPort)/",
+        method: .GET,
+        headers: .init()
+      )
+
+      let response = try client.execute(request: request).wait()
+      guard let responseContent = response.body?.string else {
+        throw XCTestError(.failureWhileWaiting, userInfo: [:])
+      }
+
+      XCTAssertNotEqual(responseContent, "1605830400")
+
+      expectation.fulfill()
+    }
+  }
 }

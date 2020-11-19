@@ -81,9 +81,12 @@ public extension Response {
     success(.file(path))
   }
 
-  func json<T: Encodable>(_ model: T) -> Future<MiddlewareOutput> {
+  func json<T: Encodable>(
+    _ model: T,
+    using encoder: JSONEncoder = .init()
+  ) -> Future<MiddlewareOutput> {
     do {
-      let output = try MiddlewareOutput.json(model)
+      let output = try MiddlewareOutput.json(model, using: encoder)
       return success(output)
     } catch {
       return failure(error)
