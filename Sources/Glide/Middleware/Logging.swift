@@ -1,4 +1,4 @@
-public let consoleLogger = {
+public let requestLogger = {
   passthrough { request, response in
     print("\(request.head.method):", request.head.uri)
   }

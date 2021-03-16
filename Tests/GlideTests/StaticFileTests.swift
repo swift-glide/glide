@@ -22,7 +22,7 @@ final class StaticFileTests: GlideTests {
 
     performHTTPTest { app, client in
       app.use(
-        consoleLogger,
+        requestLogger,
         corsHandler(allowOrigin: "*"),
         staticFileHandler(workingDirectory: testWorkingDirectory)
       )
@@ -55,7 +55,7 @@ final class StaticFileTests: GlideTests {
 
     performHTTPTest { app, client in
       app.use(
-        consoleLogger,
+        requestLogger,
         corsHandler(allowOrigin: "*"),
         staticFileHandler(workingDirectory: testWorkingDirectory)
       )

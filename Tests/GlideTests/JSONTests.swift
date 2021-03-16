@@ -17,7 +17,7 @@ final class JSONTests: GlideTests {
 
     performHTTPTest { app, client in
       app.use(
-        consoleLogger
+        requestLogger
       )
 
       app.get("/users/\("id", as: Int.self)") { request, response in

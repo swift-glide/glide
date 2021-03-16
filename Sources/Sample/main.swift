@@ -17,7 +17,7 @@ enum CustomError: LocalizedError {
     case .missingUser:
       return "The user seems to be missing."
     default:
-      return "Unknown error."
+      return "Some non-critical error occured."
     }
   }
 }
@@ -46,18 +46,23 @@ let app = Application()
 
 app.loadDotEnv()
 
-print(app.environment["THREE"] ?? "No .env file detected.")
+if app.env["THREE"] != nil {
+  print(".env file loaded!")
+} else {
+  print("No .env file detected.")
+}
 
 app.use(
-  consoleLogger,
+  requestLogger,
   corsHandler(allowOrigin: "*"),
   staticFileHandler(path: "/static/\(wildcard: .all)")
 )
 
-app.catch(errorLogger, { errors, request, _ in
+app.catch(errorLogger)
+
+app.catch { errors, request, _ in
   print(errors.count, "error(s) encountered.")
-  return request.success
-})
+}
 
 app.get("/throw-sync") { _, _ in
   throw CustomError.nonCriticalError
