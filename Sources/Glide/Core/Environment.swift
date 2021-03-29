@@ -47,12 +47,19 @@ public struct EnvironmentFile {
     fileIO: NonBlockingFileIO,
     on eventLoop: EventLoop
   ) -> EventLoopFuture<EnvironmentFile> {
-    fileIO.openFile(path: path, eventLoop: eventLoop).flatMap { arg -> EventLoopFuture<ByteBuffer> in
-      fileIO.read(fileRegion: arg.1, allocator: .init(), eventLoop: eventLoop)
-        .flatMapThrowing { buffer in
-          try arg.0.close()
-          return buffer
-        }
+    fileIO.openFile(
+      path: path,
+      eventLoop: eventLoop
+    ).flatMap { arg -> EventLoopFuture<ByteBuffer> in
+      fileIO.read(
+        fileRegion: arg.1,
+        allocator: .init(),
+        eventLoop: eventLoop
+      )
+      .flatMapThrowing { buffer in
+        try arg.0.close()
+        return buffer
+      }
     }.map { buffer in
       return .init(with: buffer.string)
     }
@@ -88,30 +95,35 @@ public extension Application {
 }
 
 private func parse(_ string: String) -> [String: String] {
-  string.split(separator: "\n").reduce([String: String]()) { dict, line in
-    let pair = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+  string
+    .split(separator: "\n")
+    .filter { $0.first != "#" }
+    .reduce([String: String]()) { dict, line in
+      let pair = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
 
-    switch pair.count {
-    case 2:
-      let key = pair[0]
-      var value = pair[1]
+      switch pair.count {
+      case 2:
+        let key = pair[0]
+        var value = pair[1]
 
-      switch (value.first, value.last) {
-      case ("\"", "\""), ("'", "'"):
-        value = value.dropFirst().dropLast()
+        switch (value.first, value.last) {
+        case ("\"", "\""), ("'", "'"):
+          value = value.dropFirst().dropLast()
+        default: break
+        }
+
+        var newDict = dict
+        newDict[String(key)] = String(value)
+        return newDict
+
+      case 1:
+        var newDict = dict
+        newDict[String(pair[0])] = ""
+        return newDict
+
       default: break
       }
 
-      var newDict = dict
-      newDict[String(key)] = String(value)
-      return newDict
-    case 1:
-      var newDict = dict
-      newDict[String(pair[0])] = ""
-      return newDict
-    default: break
+      return dict
     }
-
-    return dict
-  }
 }

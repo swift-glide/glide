@@ -15,6 +15,8 @@ final class EnvFileTests: GlideTests {
       XCTAssertEqual(app.env["FOUR"], "thud")
       XCTAssertNil(app.env.THREE)
       XCTAssertEqual(app.env.Three, "baz")
+      XCTAssertNil(app.env["#SIX"])
+      XCTAssertNil(app.env.six)
       expectation.fulfill()
     }
 
