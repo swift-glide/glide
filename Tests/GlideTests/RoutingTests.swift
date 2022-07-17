@@ -12,7 +12,7 @@ final class PathMatchingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/") { request, response in
-        return response.send("success")
+        return response.syncSend("success")
       }
 
       let request = try HTTPClient.Request(
@@ -44,7 +44,7 @@ final class PathMatchingTests: GlideTests {
         XCTAssertEqual(request.pathParameters.bar, 58)
         expectation.fulfill()
 
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -70,7 +70,7 @@ final class PathMatchingTests: GlideTests {
         XCTAssertEqual(request.pathParameters.qux, 58)
         expectation.fulfill()
 
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -90,15 +90,15 @@ final class PathMatchingTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/hello/{foo}/{bar:string}/baz/{qux:int}/") { request, response in
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       app.get("/hello") { request, response in
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       app.get("/help") { request, response in
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -133,7 +133,7 @@ final class PathMatchingTests: GlideTests {
 
         expectation.fulfill()
 
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -159,7 +159,7 @@ final class PathMatchingTests: GlideTests {
         XCTAssertEqual(request.pathParameters.wildcards, ["bar", "baz", "qux"])
         expectation.fulfill()
 
-        return response.send(request.pathParameters.foo ?? "")
+        return response.syncSend(request.pathParameters.foo ?? "")
       }
 
       let request = try HTTPClient.Request(
@@ -187,7 +187,7 @@ final class PathMatchingTests: GlideTests {
       app.get(MyCustomParser()) { request, response in
         expectation.fulfill()
 
-        return response.send("Matching successful")
+        return response.syncSend("Matching successful")
       }
 
       let request = try HTTPClient.Request(

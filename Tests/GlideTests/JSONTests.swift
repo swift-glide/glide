@@ -25,7 +25,7 @@ final class JSONTests: GlideTests {
           User(id: id)
         }
 
-        return response.json(find(request.pathParameters.id ?? 0))
+        return response.syncJson(find(request.pathParameters.id ?? 0))
       }
 
       let request = try HTTPClient.Request(
@@ -63,7 +63,7 @@ final class JSONTests: GlideTests {
           return encoder
         }()
 
-        return response.json(date, using: encoder)
+        return response.syncJson(date, using: encoder)
       }
 
       let request = try HTTPClient.Request(
@@ -91,7 +91,7 @@ final class JSONTests: GlideTests {
     performHTTPTest { app, client in
       app.get("/") { request, response in
         let date = Date(timeIntervalSince1970: 1605830400)
-        return response.json(date)
+        return response.syncJson(date)
       }
 
       let request = try HTTPClient.Request(

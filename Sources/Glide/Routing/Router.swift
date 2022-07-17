@@ -4,10 +4,15 @@ import NIO
 
 public class Router {
   private var middlewares = [Middleware]()
+  private var asyncMiddleware = [AsyncMiddleware]()
   private var errorHandlers = [ErrorHandler]()
 
   public func use(_ middleware: ThrowingMiddleware...) {
     self.middlewares.append(contentsOf: middleware.map(nonThrowing))
+  }
+
+  public func use(_ middleware: AsyncMiddleware...) {
+    self.asyncMiddleware.append(contentsOf: middleware)
   }
 
   func unwind(
@@ -176,14 +181,10 @@ func sendFile(
   at path: String,
   response: Response,
   request: Request
-) -> Future<Void> {
-  do {
-    return try request.fileReader.readEntireFile(at: path)
+) async throws {
+  try request.fileReader.readEntireFile(at: path)
       .flatMap { buffer in
         response.body = .buffer(buffer)
         return response.success
       }
-  } catch {
-    return response.failure(error)
-  }
 }

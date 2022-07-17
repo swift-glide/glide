@@ -22,3 +22,9 @@ func nonThrowing(_ middleWare: @escaping ThrowingMiddleware) -> Middleware {
     }
   }
 }
+
+// Async
+
+public typealias AsyncHandler = () async -> Void
+public typealias AsyncMiddleware = (Request, Response) async throws -> MiddlewareOutput
+public typealias AsyncErrorHandler = ([Error], Request, Response) async throws -> Void

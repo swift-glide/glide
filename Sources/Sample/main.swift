@@ -54,7 +54,7 @@ if app.env["THREE"] != nil {
 
 app.use(
   requestLogger,
-  corsHandler(allowOrigin: "*"),
+  corsMiddleware(allowOrigin: "*"),
   staticFileHandler(path: "/static/\(wildcard: .all)")
 )
 
@@ -81,7 +81,7 @@ app.get("/abort-async") { request, response in
 }
 
 app.get("/hello/\("name")") { request, response in
-  response.send("Hello, \(request.pathParameters.name ?? "world")!")
+  response.syncSend("Hello, \(request.pathParameters.name ?? "world")!")
 }
 
 app.get("/users/\("id", as: Int.self)") { request, response in
@@ -89,7 +89,7 @@ app.get("/users/\("id", as: Int.self)") { request, response in
     User(id: id)
   }
 
-  return response.json(find(request.pathParameters.id ?? 0))
+  return response.syncJson(find(request.pathParameters.id ?? 0))
 }
 
 app.post("/post") { request, response in
@@ -99,7 +99,7 @@ app.post("/post") { request, response in
 
   do {
     let user = try JSONDecoder().decode(User.self, from: data)
-    return response.send("\(user.name)")
+    return response.syncSend("\(user.name)")
   } catch let error as DecodingError {
     throw error
   }
@@ -126,7 +126,7 @@ struct HTML: HTMLRendering {
 
 app.get("/html") { _, response in
   let renderer = HTML()
-  return response.html(renderer)
+  return response.syncHtml(renderer)
 }
 
 app.listen(1337)

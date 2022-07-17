@@ -24,3 +24,13 @@ public func passthrough(
     return request.next
   }
 }
+
+
+public func asyncPassthrough(
+  _ perform: @escaping ThrowingSyncHTTPHandler
+) -> AsyncMiddleware {
+  { request, response in
+    try perform(request, response)
+    return try await request.nextAsync()
+  }
+}

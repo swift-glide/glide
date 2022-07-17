@@ -17,7 +17,7 @@ final class ParameterMatchingTests: GlideTests {
         XCTAssertEqual(request.queryParameters.baz, "qux")
         expectation.fulfill()
 
-        return request.success(.text(request.queryParameters.foo ?? ""))
+        return request.syncSuccess(.text(request.queryParameters.foo ?? ""))
       }
 
       let request = try HTTPClient.Request(
@@ -57,7 +57,7 @@ final class ParameterMatchingTests: GlideTests {
 
         expectation.fulfill()
 
-        return request.success(.text(request.queryParameters.foo ?? ""))
+        return request.syncSuccess(.text(request.queryParameters.foo ?? ""))
       }
 
       let request = try HTTPClient.Request(
@@ -88,7 +88,7 @@ final class ParameterMatchingTests: GlideTests {
 
         expectation.fulfill()
 
-        return request.success(.text(request.queryParameters.foo ?? ""))
+        return request.syncSuccess(.text(request.queryParameters.foo ?? ""))
       }
 
       let request = try HTTPClient.Request(
@@ -114,13 +114,13 @@ final class ParameterMatchingTests: GlideTests {
         XCTAssertEqual(request.queryParameters.toto, "")
         expectation.fulfill()
 
-        return request.success(.text(request.queryParameters.foo ?? ""))
+        return request.syncSuccess(.text(request.queryParameters.foo ?? ""))
       }
 
       app.get("\(wildcard: .all)") { request, response in
         XCTFail("The path expression didn't match the provided URL.")
         expectation.fulfill()
-        return request.success(.text("Oops"))
+        return request.syncSuccess(.text("Oops"))
       }
 
       let request = try HTTPClient.Request(
@@ -142,13 +142,13 @@ final class ParameterMatchingTests: GlideTests {
       app.get("/query?\("thud")") { request, response in
         XCTFail("The path expression should not match this URL.")
         expectation.fulfill()
-        return request.success(.text("Oops"))
+        return request.syncSuccess(.text("Oops"))
       }
 
       app.get("\(wildcard: .all)") { request, response in
         XCTAssert(true)
         expectation.fulfill()
-        return request.success(.text("Yieet!"))
+        return request.syncSuccess(.text("Yieet!"))
       }
 
       let request = try HTTPClient.Request(

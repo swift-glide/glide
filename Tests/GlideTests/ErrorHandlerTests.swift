@@ -90,7 +90,7 @@ final class ErrorHandlerTests: GlideTests {
       }
 
       app.use { _, response in
-        return response.send("Success")
+        return response.syncSend("Success")
       }
 
       let request = try HTTPClient.Request(

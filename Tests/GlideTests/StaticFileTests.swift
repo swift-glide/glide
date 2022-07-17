@@ -23,7 +23,7 @@ final class StaticFileTests: GlideTests {
     performHTTPTest { app, client in
       app.use(
         requestLogger,
-        corsHandler(allowOrigin: "*"),
+        corsMiddleware(allowOrigin: "*"),
         staticFileHandler(workingDirectory: testWorkingDirectory)
       )
 
@@ -56,12 +56,12 @@ final class StaticFileTests: GlideTests {
     performHTTPTest { app, client in
       app.use(
         requestLogger,
-        corsHandler(allowOrigin: "*"),
+        corsMiddleware(allowOrigin: "*"),
         staticFileHandler(workingDirectory: testWorkingDirectory)
       )
 
       app.get("/ping") { _, response in
-        return response.send("pong")
+        return response.syncSend("pong")
       }
 
       let request = try HTTPClient.Request(
