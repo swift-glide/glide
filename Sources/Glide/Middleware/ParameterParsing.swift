@@ -1,4 +1,4 @@
-let parameterParsingHandler: ThrowingSyncHTTPHandler = { request, response in
+let parameterParsingHandler: HTTPHandler = { request, response in
   guard let components = URLComponents(string: request.head.uri)
     else { return }
 

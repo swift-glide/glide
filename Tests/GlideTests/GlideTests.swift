@@ -35,7 +35,7 @@ class AppTests: GlideTests {
 
     performHTTPTest { app, client in
       app.get("/ping") { _, response in
-        return response.syncSend("pong")
+        return response.send("pong")
       }
 
       let request = try HTTPClient.Request(

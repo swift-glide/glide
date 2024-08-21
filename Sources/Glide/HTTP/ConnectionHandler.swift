@@ -17,10 +17,13 @@ class HTTPConnectionHandler: ChannelInboundHandler {
     let request = unwrapInboundIn(data)
     let response = Response(eventLoop: context.eventLoop)
 
-    router.unwind(
-      request: request,
-      response: response
-    ).whenComplete { result in
+    future(on: context.eventLoop) {
+      try await self.router.unwind(
+        request: request,
+        response: response
+      )
+    }
+    .whenComplete { result in
       switch result {
       case .success(_):
         context.write(

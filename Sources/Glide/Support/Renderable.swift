@@ -2,5 +2,5 @@ import Foundation
 import NIO
 
 public protocol HTMLRendering {
-  func render(_ eventLoop: EventLoop) -> Future<String>
+  func render(_ eventLoop: EventLoop) async throws -> String
 }

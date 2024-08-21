@@ -19,24 +19,33 @@ public struct FileReader {
   public func readEntireFile(at path: String) async throws -> ByteBuffer {
     var data = allocator.buffer(capacity: 0)
 
-    return try readFile(at: path) { chunk in
+    try await readFile(at: path) { chunk in
       var newChunk = chunk
       data.writeBuffer(&newChunk)
-      return self.eventLoop.makeSucceededFuture(())
-    }.map { data }
+    }
+
+    return data
   }
 
-  public func readEntireFile(at path: String) throws -> Future<ByteBuffer> {
-    var data = allocator.buffer(capacity: 0)
+  public func readFile(
+    at path: String,
+    chunkSize: Int = NonBlockingFileIO.defaultChunkSize,
+    onRead: @escaping (ByteBuffer) async -> Void
+  ) async throws {
+    let attributes = try FileManager.default.attributesOfItem(atPath: path)
 
-    return try readFile(at: path) { chunk in
-      var newChunk = chunk
-      data.writeBuffer(&newChunk)
-      return self.eventLoop.makeSucceededFuture(())
-    }.map { data }
+    guard let fileSize = attributes[.size] as? NSNumber else {
+      throw GlideError.assetNotFound
+    }
+
+    try await readChunked(
+      at: path,
+      fileSize: fileSize.intValue,
+      chunkSize: chunkSize,
+      onRead: onRead
+    )
   }
-
-  private func readChunkedAsync(
+  private func readChunked(
     at path: String,
     fileSize: Int,
     chunkSize: Int,
@@ -52,13 +61,9 @@ public struct FileReader {
       allocator: allocator,
       eventLoop: eventLoop
     ) { byteBuffer in
-      let promise = eventLoop.makePromise(of: Void.self)
-
-      promise.completeWithTask {
+      future(on: eventLoop) {
         await onRead(byteBuffer)
       }
-
-      return promise.futureResult
     }
 
     readFile.whenComplete { _ in
@@ -67,4 +72,13 @@ public struct FileReader {
 
     return try await readFile.get()
   }
+}
+
+func future<T>(
+  on eventLoop: EventLoop,
+  _ work: @escaping () async throws -> T
+) -> EventLoopFuture<T> {
+  let promise = eventLoop.makePromise(of: T.self)
+  promise.completeWithTask { try await work() }
+  return promise.futureResult
 }
