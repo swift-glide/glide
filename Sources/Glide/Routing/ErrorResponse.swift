@@ -1,5 +1,5 @@
 extension Router {
-  public struct ErrorResponse: Codable {
+  public struct ErrorResponse: Codable, Error {
     var error: String
     var code: Int?
   }

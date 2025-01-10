@@ -54,22 +54,14 @@ if app.env["THREE"] != nil {
 
 app.use(
   requestLogger,
-  corsHandler(allowOrigin: "*"),
+  corsMiddleware(allowOrigin: "*"),
   staticFileHandler(path: "/static/\(wildcard: .all)")
 )
 
 app.catch(errorLogger)
 
-app.catch { errors, request, _ in
-  print(errors.count, "error(s) encountered.")
-}
-
-app.get("/throw-sync") { _, _ in
+app.get("/throw") { request, response in
   throw CustomError.nonCriticalError
-}
-
-app.get("/throw-async") { request, response in
-  request.failure(CustomError.nonCriticalError)
 }
 
 app.get("/abort-sync") { _, _ in
@@ -77,7 +69,7 @@ app.get("/abort-sync") { _, _ in
 }
 
 app.get("/abort-async") { request, response in
-  request.failure(CustomAbortError.badCredentials)
+  throw CustomAbortError.badCredentials
 }
 
 app.get("/hello/\("name")") { request, response in
@@ -89,7 +81,7 @@ app.get("/users/\("id", as: Int.self)") { request, response in
     User(id: id)
   }
 
-  return response.json(find(request.pathParameters.id ?? 0))
+  return try response.json(find(request.pathParameters.id ?? 0))
 }
 
 app.post("/post") { request, response in
@@ -106,27 +98,25 @@ app.post("/post") { request, response in
 }
 
 struct HTML: HTMLRendering {
-  func render(_ eventLoop: EventLoop) -> Future<String> {
-    return eventLoop.makeSucceededFuture(
-      """
-      <!doctype html>
-        <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <title>We're Live!</title>
-        </head>
-        <body>
-          Hello, world!
-        </body>
-      </html>
-      """
-    )
+  func render(_ eventLoop: EventLoop) async throws -> String {
+    """
+    <!doctype html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <title>We're Live!</title>
+      </head>
+      <body>
+        Hello, world!
+      </body>
+    </html>
+    """
   }
 }
 
 app.get("/html") { _, response in
   let renderer = HTML()
-  return response.html(renderer)
+  return try await response.html(renderer)
 }
 
 app.listen(1337)

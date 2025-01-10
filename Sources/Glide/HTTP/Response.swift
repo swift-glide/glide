@@ -38,29 +38,21 @@ public extension Response {
 }
 
 extension Response {
-  func with(_ text: String, as type: MIMEType) -> Future<Void> {
+  func with(_ text: String, as type: MIMEType) {
     setContentType(type)
     body = .string(text)
-    return success
   }
 
-  func with(_ data: Data, as type: MIMEType) -> Future<Void> {
+  func with(_ data: Data, as type: MIMEType) {
     setContentType(type)
     self["Content-Length"] = "\(data.count)"
     body = .data(data)
-    return success
   }
 
-  func with<T: Encodable>(_ model: T) -> Future<Void> {
+  func with<T: Encodable>(_ model: T) throws {
     let data : Data
-
-    do {
-      data = try JSONEncoder().encode(model)
-      body = .data(data)
-      return success
-    } catch {
-      return failure(error)
-    }
+    data = try JSONEncoder().encode(model)
+    body = .data(data)
   }
 
   public func setContentType(_ type: MIMEType) {
@@ -69,46 +61,43 @@ extension Response {
 }
 
 public extension Response {
-  func send(_ text: String, as type: MIMEType = .plainText) -> Future<MiddlewareOutput> {
-    success(.text(text, as: type))
+  func send(_ text: String, as type: MIMEType = .plainText) -> MiddlewareOutput {
+    .text(text, as: type)
   }
 
-  func send(_ data: Data) -> Future<MiddlewareOutput> {
-    success(.data(data))
+  func send(_ data: Data) -> MiddlewareOutput {
+    .data(data)
   }
 
-  func file(_ path: String) -> Future<MiddlewareOutput> {
-    success(.file(path))
+  func file(_ path: String) -> MiddlewareOutput {
+    .file(path)
   }
 
   func json<T: Encodable>(
     _ model: T,
     using encoder: JSONEncoder = .init()
-  ) -> Future<MiddlewareOutput> {
-    do {
-      let output = try MiddlewareOutput.json(model, using: encoder)
-      return success(output)
-    } catch {
-      return failure(error)
-    }
+  ) throws -> MiddlewareOutput {
+    return try .json(model, using: encoder)
   }
 
-  func html(_ renderer: HTMLRendering) -> Future<MiddlewareOutput> {
-    renderer.render(eventLoop).flatMap {
-      return self.success(.text($0, as: .html))
-    }
+  func html(_ renderer: HTMLRendering) async throws -> MiddlewareOutput {
+    let html = try await renderer.render(eventLoop)
+    return .text(html, as: .html)
   }
 
-  func toOutput() -> Future<MiddlewareOutput> {
+  func toOutput() async throws -> MiddlewareOutput {
     switch body {
     case .string(let text):
       return send(text)
+
     case .buffer(let byteBuffer):
       return send(byteBuffer.data)
+
     case .data(let data):
       return send(data)
+
     default:
-      return success(.text(""))
+      return .text("")
     }
   }
 }

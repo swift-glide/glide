@@ -9,7 +9,7 @@ public enum MiddlewareOutput {
 
   public static func json<T: Encodable>(
     _ model: T,
-  using encoder: JSONEncoder
+    using encoder: JSONEncoder
   ) throws -> Self {
     let data = try encoder.encode(model)
     return .data(data)
@@ -17,10 +17,10 @@ public enum MiddlewareOutput {
 }
 
 public func passthrough(
-  _ perform: @escaping ThrowingSyncHTTPHandler
-) -> ThrowingMiddleware {
-  return { request, response in
+  _ perform: @escaping HTTPHandler
+) -> Middleware {
+  { request, response in
     try perform(request, response)
-    return request.next
+    return .next
   }
 }

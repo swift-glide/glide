@@ -11,7 +11,7 @@ class HTTPResponseSerializer: ChannelOutboundHandler {
     context: ChannelHandlerContext,
     data: NIOAny,
     promise: EventLoopPromise<Void>?
-  ) {
+  ) async {
     let response = unwrapOutboundIn(data)
 
     writeHead(
@@ -20,13 +20,12 @@ class HTTPResponseSerializer: ChannelOutboundHandler {
       headers: response.headers
     )
 
-    writeBody(on: context, body: response.body)
-      .recover {
-        self.handleError($0, on: context)
-      }
-      .whenSuccess {
-        self.writeEnd(on: context)
-      }
+    do {
+      try await writeBody(on: context, body: response.body)
+      writeEnd(on: context)
+    } catch {
+      handleError(error, on: context)
+    }
   }
 
   private func writeHead(
@@ -46,23 +45,26 @@ class HTTPResponseSerializer: ChannelOutboundHandler {
   private func writeBody(
     on context: ChannelHandlerContext,
     body: Response.Body
-  ) -> Future<Void> {
+  ) async throws {
     var byteBuffer: ByteBuffer
 
     switch body {
     case .buffer(let buffer):
       byteBuffer = buffer
+
     case .string(let text):
       byteBuffer = context.channel.allocator.buffer(capacity: text.count)
       byteBuffer.writeString(text)
+
     case .data(let data):
       byteBuffer = context.channel.allocator.buffer(capacity: data.count)
       byteBuffer.writeBytes(data)
+
     case .empty:
-      return context.success
+      return
     }
 
-    return context.writeAndFlush(
+    return try await context.writeAndFlush(
       wrapOutboundOut(
         .body(
           .byteBuffer(byteBuffer)
